@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Header, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, HttpCode, Param, Post, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from 'src/utils/interfaces';
-import { CreateUserDto } from 'src/utils/interfaces.dto';
+import { CreateUserDto, UpdatePasswordDto } from 'src/utils/interfaces.dto';
 
 // const a = new DataBaseStore();
 
@@ -11,11 +11,15 @@ export class UsersController {
     // /user +
     // /user/:id (id: uuid) +
     // POST
-    // /user
+    // /user +
+    // error handling +-
     //  PUT
-    // /user/:id (id: uuid)
+    // /user/:id (id: uuid) +
+    // error handling
     // DELETE
     // /user/:id
+
+    // no additional fields
 
     constructor(private readonly usersService: UsersService) {
 
@@ -34,7 +38,22 @@ export class UsersController {
     }
 
     @Post()
-    addUser(@Body() user: CreateUserDto): User{
+    @Header("Content-Type", "application/json")
+    @HttpCode(201)
+    addUser(@Body() user: CreateUserDto): Partial<User>{
         return this.usersService.addUser(user);
+    }
+
+    @Put(':id')
+    @Header("Content-Type", "application/json")
+    updateUserInfo(@Param('id') id: string, @Body() updatedUserPassword: UpdatePasswordDto) {
+        return this.usersService.updateUserInfo(id, updatedUserPassword);
+    }
+
+    @Delete(':id')
+    @Header("Content-Type", "application/json")
+    @HttpCode(204)
+    deleteUser(@Param('id') id: string) {
+        return this.usersService.deleteUser(id);
     }
 }
