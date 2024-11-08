@@ -3,23 +3,9 @@ import { UsersService } from './users.service';
 import { User } from 'src/utils/interfaces';
 import { CreateUserDto, UpdatePasswordDto } from 'src/utils/interfaces.dto';
 
-// const a = new DataBaseStore();
-
 @Controller('user')
 export class UsersController {
-    // GET 
-    // /user +
-    // /user/:id (id: uuid) +
-    // POST
-    // /user +
-    // error handling +-
-    //  PUT
-    // /user/:id (id: uuid) +
-    // error handling
-    // DELETE
-    // /user/:id
-
-    // no additional fields
+    // no additional fields!!!
 
     constructor(private readonly usersService: UsersService) {
 

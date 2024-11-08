@@ -9,3 +9,8 @@ export interface CreateUserDto {
     oldPassword: string;
     newPassword: string;
   }
+
+  export interface CreateTrackDto {
+    name: string;
+    duration: number;
+  }

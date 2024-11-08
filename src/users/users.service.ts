@@ -7,9 +7,6 @@ import { CreateUserDto, UpdatePasswordDto } from 'src/utils/interfaces.dto';
 export class UsersService {
     users: User[] = [];
 
-    constructor() {
-    }
-
     @Get()
     findAll() {
         const users =  this.users.map((user) => {
@@ -85,11 +82,11 @@ export class UsersService {
             throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST)
         } else if (!removedUser) {
             throw new HttpException('User Not Found', HttpStatus.NOT_FOUND)
-        } else {
-            this.users = this.users.filter((user) => user.id !== id);
+        } 
+        else {
             const {password, ...resRemovedUser} = removedUser;
-            console.log(resRemovedUser);
-            return resRemovedUser; // why does not return response??
+            this.users = this.users.filter((user) => user.id !== id);
+            return resRemovedUser;
         }
     }
 
