@@ -14,3 +14,5 @@ export interface CreateUserDto {
     name: string;
     duration: number;
   }
+
+  export interface UpdateTrackDto extends CreateTrackDto {}

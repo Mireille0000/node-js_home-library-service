@@ -57,7 +57,7 @@ export class UsersService {
         // error codes: 400 (userId is invalid (not uuid)), 404(not found), 403 (oldPassword is wrong)
         const UUIDRegEx = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
         const user = this.users.find((user) => user.id === id);
-        const {login, version, createdAt, updatedAt} = user;
+        // const {login, version, createdAt, updatedAt} = user;
 
         if (!UUIDRegEx.test(id)) {
             throw new HttpException('Bad Request: Id is invalid', HttpStatus.BAD_REQUEST);
