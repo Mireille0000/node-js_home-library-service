@@ -33,8 +33,8 @@ export class UsersController {
 
     @Put(':id')
     @Header("Content-Type", "application/json")
-    updateUserInfo(@Param('id') id: string, @Body() updatedUserPassword: UpdatePasswordDto) {
-        return this.usersService.updateUserInfo(id, updatedUserPassword);
+    updateUserPassword(@Param('id') id: string, @Body() updatedUserPassword: UpdatePasswordDto) {
+        return this.usersService.updateUserPassword(id, updatedUserPassword);
     }
 
     @Delete(':id')

@@ -49,19 +49,20 @@ export class UsersService {
         return resNewUser;
     }
 
-    updateUserInfo(id: string, updatedUserPassword: UpdatePasswordDto) {
+    updateUserPassword(id: string, updatedUserPassword: UpdatePasswordDto) {
         const UUIDRegEx = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
         const user = this.users.find((user) => user.id === id);
         // dto 
+        console.log(updatedUserPassword);
         if (!UUIDRegEx.test(id)) {
             throw new HttpException('Bad Request: Id is invalid', HttpStatus.BAD_REQUEST);
+        } else if (!updatedUserPassword.oldPassword && !updatedUserPassword.newPassword) {
+            throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
         } else if (!user) {
             throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
         } else if (updatedUserPassword.oldPassword !== user.password) {
             console.log(updatedUserPassword.newPassword);
             throw new HttpException('Old Password is wrong', HttpStatus.FORBIDDEN);
-        } else if (!updatedUserPassword.oldPassword || !updatedUserPassword.newPassword) {
-            throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
         } else {
             user.version = user.version + 1;
             user.password = updatedUserPassword.newPassword;
