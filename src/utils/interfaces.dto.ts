@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsString, isNotEmpty } from "class-validator";
 
+
 export interface CreateUserDto {
     login: string;
     password: string;

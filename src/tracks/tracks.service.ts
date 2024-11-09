@@ -1,6 +1,5 @@
-import { Body, Delete, Get, Header, HttpCode, HttpException, HttpStatus, Injectable, Param, Post, Put } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { StatusCodes } from 'http-status-codes';
 import { Track } from 'src/utils/interfaces';
 import { CreateTrackDto, UpdateTrackDto } from 'src/utils/interfaces.dto';
 
@@ -8,13 +7,11 @@ import { CreateTrackDto, UpdateTrackDto } from 'src/utils/interfaces.dto';
 export class TracksService {
     tracks: Track[] = [];
 
-    @Get()
     findAllTracks() {
         return this.tracks;
     }
 
-    @Get(':id')
-    findTrackById(@Param('id') id: string) {
+    findTrackById( id: string) {
         const track =  this.tracks.find((track) => track.id === id);
         const UUID = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
 
@@ -29,11 +26,10 @@ export class TracksService {
 
     }
 
-    @Post()
-    addTrack(@Body() trackInfo: CreateTrackDto) {
+    addTrack(trackInfo: CreateTrackDto) {
         const id = randomUUID();
-        const artistId = randomUUID();
-        const albumId = randomUUID();
+        const artistId = randomUUID(); // |null
+        const albumId = randomUUID(); // |null
         const newTrack = {id, ...trackInfo, artistId, albumId};
 
         if (trackInfo.hasOwnProperty("name") && trackInfo.hasOwnProperty("duration")) {
@@ -48,16 +44,15 @@ export class TracksService {
         }
     }
 
-    @Put(":id")
-    updateTrackInfo(@Param('id') id: string, @Body() updatedTrackInfo: Partial<UpdateTrackDto>) {
-        // error codes 400, 404
+    updateTrackInfo(id: string, updatedTrackInfo: Partial<UpdateTrackDto>) {
         const track = this.tracks.find((track) => track.id === id);
         const UUID = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
 
-        if(!track) {
-            throw new HttpException("Track Not Fount", HttpStatus.NOT_FOUND); // 404
-        } else if(!UUID.test(id)) {
+        // dto
+        if(!UUID.test(id)) {
             throw new HttpException("Bad Request: Invalid Id", HttpStatus.BAD_REQUEST); //400
+        } else if(!track) {
+            throw new HttpException("Track Not Fount", HttpStatus.NOT_FOUND); // 404
         } else {
             if(updatedTrackInfo.name) {
                 track.name = updatedTrackInfo.name;
@@ -70,8 +65,7 @@ export class TracksService {
         }
     }
 
-    @Delete(":id")
-    deleteTrack(@Param("id") id: string) {
+    deleteTrack( id: string) {
         const removedTrack  = this.tracks.find(((track) => track.id === id));
         const UUID = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
         if(!UUID.test(id)) {

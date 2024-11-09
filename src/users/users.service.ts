@@ -1,22 +1,21 @@
 import { Body, Delete, Get, Header, HttpException, HttpStatus, Injectable, Param, Post, Put, Res, ValidationPipe } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { User } from 'src/utils/interfaces';
-import { CreateUserDto, UpdatePasswordDto } from 'src/utils/interfaces.dto';
+import { CreateUserDto } from 'src/utils/interfaces.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class UsersService {
-    users: User[] = [];
+    users:Array<User> = [];
 
-    @Get()
     findAll() {
-        const users =  this.users.map((user) => {
+        const users = this.users.map((user) => {
             const {password, ...userWithoutPassward} = user;
             return userWithoutPassward;
         })
         return users;
     }
 
-    @Get(':id')
     findUserById(id: string) {
         const UUIDRegEx = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
         const users = this.users.map((user) => {
@@ -33,8 +32,7 @@ export class UsersService {
         }
     }
 
-    @Post()
-    addUser(@Body() user: CreateUserDto) {
+    addUser(user: CreateUserDto) {
         const id = randomUUID();
         const version: number = 1;
         const createdAt: number = new Date().getMilliseconds();
@@ -51,20 +49,19 @@ export class UsersService {
         return resNewUser;
     }
 
-    @Put(':id')
-    updateUserInfo(@Param('id') id: string, @Body() updatedUserPassword: UpdatePasswordDto) {
-        // 200 - success +
-        // error codes: 400 (userId is invalid (not uuid)), 404(not found), 403 (oldPassword is wrong)
+    updateUserInfo(id: string, updatedUserPassword: UpdatePasswordDto) {
         const UUIDRegEx = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
         const user = this.users.find((user) => user.id === id);
-        // const {login, version, createdAt, updatedAt} = user;
-
+        // dto 
         if (!UUIDRegEx.test(id)) {
             throw new HttpException('Bad Request: Id is invalid', HttpStatus.BAD_REQUEST);
         } else if (!user) {
             throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
         } else if (updatedUserPassword.oldPassword !== user.password) {
+            console.log(updatedUserPassword.newPassword);
             throw new HttpException('Old Password is wrong', HttpStatus.FORBIDDEN);
+        } else if (!updatedUserPassword.oldPassword || !updatedUserPassword.newPassword) {
+            throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
         } else {
             user.version = user.version + 1;
             user.password = updatedUserPassword.newPassword;
@@ -74,7 +71,6 @@ export class UsersService {
         }
     }
 
-    @Delete(':id')
     deleteUser(@Param('id') id: string) {
         const UUIDRegEx = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
         const removedUser = this.users.find((user) => user.id === id);
