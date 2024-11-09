@@ -36,6 +36,7 @@ export class ArtistsService {
     updateArtist(id: string, updatedArtistInfo: UpdateArtistDTO) {
         const UUID = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
         const artist = this.artists.find((artist) => artist.id === id);
+        // should correctly update artist match
 
         if(!UUID.test(id)) {
             throw new HttpException("Bad Request: Invalid Id", HttpStatus.BAD_REQUEST); 
@@ -56,7 +57,7 @@ export class ArtistsService {
     deleteArtist(id: string) {
         const artistToRemove = this.artists.find((artist) => artist.id === id);
         const UUID = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
-
+        // should set album.artistId to null after deletion
         if (!UUID.test(id)) {
             throw new HttpException("Bad Request: Invalid Id", HttpStatus.BAD_REQUEST)
         }  else if (!artistToRemove) {
