@@ -1,15 +1,21 @@
-import { Album, Artist, Favorites, Track, User } from "src/utils/interfaces";
+import { Album, Artist, FavoritesResponse, Track, User } from "src/utils/interfaces";
 
 interface HomeLibData {
-    users: User[];
+    users: User[]; //
     artists: Artist[];
     albums: Album[];
-    tracks: Track[]
+    tracks: Track[];
+    favorites: FavoritesResponse
 }
 
 export const TemporaryDB: HomeLibData = {
-    users: [],
+    users: [], //
     artists: [],
     albums: [],
-    tracks: []
+    tracks: [],
+    favorites: {
+        artists: [],
+        albums: [],
+        tracks: []
+    },
 }

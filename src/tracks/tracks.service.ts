@@ -14,7 +14,6 @@ export class TracksService {
     }
 
     findAllTracks() {
-        console.log(this.tracks);
         return TemporaryDB.tracks;
     }
 
@@ -84,6 +83,9 @@ export class TracksService {
             throw new HttpException("Track Not Found", HttpStatus.NOT_FOUND);
         } else {
             TemporaryDB.tracks = TemporaryDB.tracks.filter((track) => track.id !== id);
+            if (TemporaryDB.favorites.tracks.find((track) => track.id === id)) {
+                TemporaryDB.favorites.tracks = TemporaryDB.favorites.tracks.filter((track) => track.id !== id);
+            }
             // return removedTrack;
         }
     }

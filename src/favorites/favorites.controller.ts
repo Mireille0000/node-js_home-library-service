@@ -11,6 +11,12 @@ export class FavoritesController {
         return this.favoritesService.findFavorites()
     }
 
+    // @Get()
+    // @Header("Content-Type", "application/json")
+    // findFavsIds() {
+    //     return this.favoritesService.findFavsIds()
+    // } // should be returned?
+
     @Post("track/:id")
     @Header("Content-Type", "application/json")
     @HttpCode(201) 
@@ -50,7 +56,7 @@ export class FavoritesController {
         return this.favoritesService.addArtistInFavs(id);
     }
 
-    @Delete("/artist/:id")
+    @Delete("artist/:id")
     @Header("Content-Type", "application/json")
     @HttpCode(204)
     deleteArtistFromFavs(@Param("id") id: string) {

@@ -36,8 +36,8 @@ export class AlbumsService {
             artistId = newAlbum.artistId;
         }
         const newAlbumObj = { id, ...newAlbum, artistId };
-        // this.albums.push(newAlbumObj);
-        TemporaryDB.albums.push(newAlbumObj)
+        TemporaryDB.albums.push(newAlbumObj);
+        TemporaryDB.favorites.albums.push(newAlbumObj);
         return newAlbumObj;
     }
 
@@ -76,6 +76,10 @@ export class AlbumsService {
                     track.albumId = null;
                 }
             })
+
+            if (TemporaryDB.favorites.albums.find((album) => album.id === id)) {
+                TemporaryDB.favorites.albums =  TemporaryDB.favorites.albums.filter((album) => album.id !== id);
+            }
         }
     }
 }

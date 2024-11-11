@@ -1,38 +1,41 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Favorites } from 'src/utils/interfaces';
+import { Favorites, FavoritesResponse } from 'src/utils/interfaces';
 import { TracksService } from 'src/tracks/tracks.service';
 import { ModuleRef } from '@nestjs/core';
 import { AlbumsService } from 'src/albums/albums.service';
 import { ArtistsService } from 'src/artists/artists.service';
+import { TemporaryDB } from 'src/database/temporary-db';
 
 @Injectable()
 export class FavoritesService{
-    favorites: Favorites = {
-        artists: [],
-        albums: [],
-        tracks: []
-    };
+    favorites: FavoritesResponse;
+    favoritesReq: Favorites;
 
     tracksService: TracksService;
     albumsService: AlbumsService;
     artistsService: ArtistsService;
 
-    constructor(private readonly moduleRef: ModuleRef){}
+    constructor(private readonly moduleRef: ModuleRef){
+        this.favorites = {
+            artists: [],
+            albums: [],
+            tracks: []
+        }
 
-    findFavorites() {   
-        // this.tracksService = this.moduleRef.get(TracksService);
-        // this.albumsService = this.moduleRef.get(AlbumsService);
-        // this.artistsService =  this.moduleRef.get(ArtistsService);
-        // const tracks = this.tracksService.findAllTracks();
-        // const albums = this.albumsService.findAllAlbums();
-        // const artists = this.artistsService.findAllArtists();
-        // this.favorites = {
-        //     artists: artists,
-        //     albums: albums,
-        //     tracks: tracks
-        // } // change!
-        
-        return this.favorites;
+        this.favoritesReq = {
+            artists: [],
+            albums: [],
+            tracks: []
+        }
+    }
+
+    findFavorites() {    
+        // return this.favorites;
+        return TemporaryDB.favorites;
+    }
+
+    findFavsIds() {    
+        return this.favoritesReq;
     }
 
     addTrackInFavs(id: string) {
@@ -46,6 +49,8 @@ export class FavoritesService{
             throw new HttpException("Track Not Found", HttpStatus.UNPROCESSABLE_ENTITY)
         } else {
             this.favorites.tracks.push(track);
+            this.favoritesReq.tracks.push(track.id); //
+            TemporaryDB.favorites.tracks.push(track);
             return track;
         }
     }
@@ -60,6 +65,11 @@ export class FavoritesService{
             throw new HttpException("Track Not Found", HttpStatus.NOT_FOUND)
         } else {
             this.favorites.tracks = this.favorites.tracks.filter((track) => track.id !== id);
+            this.favoritesReq.tracks = this.favoritesReq.tracks.filter((reqId) => reqId !== id);//
+            if (TemporaryDB.tracks.find((track) => track.id === id)) {
+                TemporaryDB.favorites.tracks = TemporaryDB.favorites.tracks.filter((track) => track.id !== id)
+            }
+            // TemporaryDB.favorites.tracks = TemporaryDB.favorites.tracks.filter((track) => track.id !== id)
         }
     }
 
@@ -74,6 +84,8 @@ export class FavoritesService{
             throw new HttpException("Album Not Found", HttpStatus.UNPROCESSABLE_ENTITY)
         } else {
             this.favorites.albums.push(album);
+            this.favoritesReq.albums.push(album.id); //
+            TemporaryDB.favorites.albums.push(album);
             return album;
         }
     }
@@ -88,12 +100,17 @@ export class FavoritesService{
             throw new HttpException("Album Not Found", HttpStatus.NOT_FOUND)
         } else {
             this.favorites.albums = this.favorites.albums.filter((album) => album.id !== id);
+            this.favoritesReq.albums = this.favoritesReq.albums.filter((reqId) => reqId !== id);
             if (this.favorites.tracks.length > 0) {
                 this.favorites.tracks.filter((track) => {
                     if(album.id === track.albumId) {
                         track.albumId = null
                     }
                 })
+            }
+
+            if (TemporaryDB.favorites.albums.find((album) => album.id === id)) {
+                TemporaryDB.favorites.albums = TemporaryDB.favorites.albums.filter((album) => album.id !== id);
             }
         }
     }
@@ -109,6 +126,7 @@ export class FavoritesService{
             throw new HttpException("Album Not Found", HttpStatus.UNPROCESSABLE_ENTITY)
         } else {
             this.favorites.artists.push(artist);
+            this.favoritesReq.artists.push(artist.id); //
             return artist;
         }
     }
@@ -123,17 +141,27 @@ export class FavoritesService{
             throw new HttpException("Artist Not Found", HttpStatus.NOT_FOUND)
         } else {
             this.favorites.artists = this.favorites.artists.filter((artist) => artist.id !== id);
-            this.favorites.tracks.filter((track) => {
-                if(artist && artist.id === track.artistId) {
-                    track.artistId = null;
-                }
-            })
+            console.log(this.favorites.tracks[0]);
+            this.favoritesReq.artists = this.favoritesReq.artists.filter((reqId) => reqId !== id);
+            if(this.favorites.tracks.length > 0) {
+                this.favorites.tracks.filter((track) => {
+                    if(artist && artist.id === track.artistId) {
+                        track.artistId = null;
+                    }
+                })
+            }
 
-            this.favorites.albums.filter((album) => {
-                if(artist && artist.id === album.artistId) {
-                    album.artistId = null;
-                }
-            })
+            if(this.favorites.tracks.length > 0) {
+                this.favorites.albums.filter((album) => {
+                    if(artist && artist.id === album.artistId) {
+                        album.artistId = null;
+                    }
+                })
+            }
+
+            if (TemporaryDB.favorites.artists.find((artist) => artist.id === id)) {
+                TemporaryDB.favorites.artists = TemporaryDB.favorites.artists.filter((artist) => artist.id !== id);
+            }
         }
     }
 }

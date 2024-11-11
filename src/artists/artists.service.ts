@@ -31,6 +31,7 @@ export class ArtistsService {
         const id = randomUUID();
         const newArtistObj = {id, ...newArtist};
         TemporaryDB.artists.push(newArtistObj);
+        TemporaryDB.favorites.artists.push(newArtistObj);
         // this.artists.push(newArtistObj);
         return newArtistObj;
     }
@@ -76,6 +77,10 @@ export class ArtistsService {
                     album.artistId = null;
                 }
             })
+
+            if (TemporaryDB.favorites.artists.find((artist) => artist.id === id)) {
+                TemporaryDB.favorites.artists =  TemporaryDB.favorites.artists.filter((artist) => artist.id !== id);
+            }
             return artistToRemove;
         }
 
