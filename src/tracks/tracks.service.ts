@@ -49,22 +49,8 @@ export class TracksService {
             albumId = trackInfo.albumId;
         }
         const newTrack = {id, ...trackInfo, artistId, albumId};
-        // this.tracks.push(newTrack);
         TemporaryDB.tracks.push(newTrack);
         return newTrack;
-        
-
-        // if (trackInfo.hasOwnProperty("name") && trackInfo.hasOwnProperty("duration")) {
-        //     if(typeof trackInfo.duration === "number" && typeof trackInfo.name === "string") {
-        //         this.tracks.push(newTrack);
-        //         TemporaryDB.tracks.push(newTrack);
-        //         return newTrack;
-        //     } else {
-        //         throw new HttpException("Bad Request", HttpStatus.BAD_REQUEST);
-        //     }
-        // } else {
-        //     throw new HttpException("Bad Request", HttpStatus.BAD_REQUEST);
-        // }
     }
 
     updateTrackInfo(id: string, updatedTrackInfo: Partial<UpdateTrackDto>) {

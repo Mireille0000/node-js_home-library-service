@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Header, HttpCode, Post } from '@nestjs/common';
+import { Controller, Delete, Get, Header, HttpCode, Param, Post } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 
 @Controller('favs')
@@ -11,15 +11,14 @@ export class FavoritesController {
         return this.favoritesService.findFavorites()
     }
 
-    @Post("/track/:id")
+    @Post("track/:id")
     @Header("Content-Type", "application/json")
     @HttpCode(201) 
-    addTrackToFavs(id: string) {
-        // status codes: 201, 400, 422
-        return console.log("add track to favs")
+    addTrackToFavs(@Param("id") id: string) {
+        return this.favoritesService.addTrackInFavs(id);
     }
 
-    @Delete("/track/:id")
+    @Delete("track/:id")
     @Header("Content-Type", "application/json")
     @HttpCode(204)
     deleteTrackFromFavs(id: string) {
@@ -27,15 +26,15 @@ export class FavoritesController {
         return console.log("delete track from favs")
     }
 
-    @Post("/album/:id")
+    @Post("album/:id")
     @Header("Content-Type", "application/json")
     @HttpCode(201) 
-    addAlbumToFavs(id: string) {
+    addAlbumToFavs(@Param("id") id: string) {
         // status codes: 201, 400, 422
-        return console.log("add album to favs")
+        return this.favoritesService.addAlbumInFavs(id);
     }
 
-    @Delete("/album/:id")
+    @Delete("album/:id")
     @Header("Content-Type", "application/json")
     @HttpCode(204)
     deleteAlbumFromFavs(id: string) {
@@ -43,12 +42,12 @@ export class FavoritesController {
         return console.log("delete album from favs")
     }
 
-    @Post("/artist/:id")
+    @Post("artist/:id")
     @Header("Content-Type", "application/json")
     @HttpCode(201) 
-    addArtistToFavs(id: string) {
+    addArtistToFavs(@Param("id") id: string) {
         // status codes: 201, 400, 422
-        return console.log("add artist to favs")
+        return this.favoritesService.addArtistInFavs(id);
     }
 
     @Delete("/artist/:id")
