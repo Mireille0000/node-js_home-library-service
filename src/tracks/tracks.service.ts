@@ -84,7 +84,7 @@ export class TracksService {
             throw new HttpException("Track Not Found", HttpStatus.NOT_FOUND);
         } else {
             TemporaryDB.tracks = TemporaryDB.tracks.filter((track) => track.id !== id);
-            return removedTrack;
+            // return removedTrack;
         }
     }
 }

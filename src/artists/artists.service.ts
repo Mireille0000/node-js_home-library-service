@@ -65,7 +65,6 @@ export class ArtistsService {
         }  else if (!artistToRemove) {
             throw new HttpException("Artist Not Found", HttpStatus.NOT_FOUND)
         } else {
-            // this.artists = this.artists.filter((artist) => artist.id !== id);
             TemporaryDB.artists = TemporaryDB.artists.filter((artist) => artist.id !== id);
             TemporaryDB.tracks.filter((track) => {
                 if (artistToRemove.id === track.artistId) {

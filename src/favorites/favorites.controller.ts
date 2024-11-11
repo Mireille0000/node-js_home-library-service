@@ -21,9 +21,9 @@ export class FavoritesController {
     @Delete("track/:id")
     @Header("Content-Type", "application/json")
     @HttpCode(204)
-    deleteTrackFromFavs(id: string) {
+    deleteTrackFromFavs(@Param("id") id: string) {
         // status codes: 204, 400, 404
-        return console.log("delete track from favs")
+        return this.favoritesService.deleteTrackFromFavs(id)
     }
 
     @Post("album/:id")
@@ -37,9 +37,9 @@ export class FavoritesController {
     @Delete("album/:id")
     @Header("Content-Type", "application/json")
     @HttpCode(204)
-    deleteAlbumFromFavs(id: string) {
+    deleteAlbumFromFavs(@Param("id") id: string) {
         // status codes: 204, 400, 404
-        return console.log("delete album from favs")
+        return this.favoritesService.deleteAlbumFromFavs(id)
     }
 
     @Post("artist/:id")
@@ -53,9 +53,9 @@ export class FavoritesController {
     @Delete("/artist/:id")
     @Header("Content-Type", "application/json")
     @HttpCode(204)
-    deleteArtistFromFavs(id: string) {
+    deleteArtistFromFavs(@Param("id") id: string) {
         // status codes: 204, 400, 404
-        return console.log("delete artist from favs")
+        return this.favoritesService.deleteArtistFromFavs(id);
     }
 
 }
