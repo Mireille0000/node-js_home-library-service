@@ -2,17 +2,24 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Track } from 'src/utils/interfaces';
 import { CreateTrackDto, UpdateTrackDto } from 'src/utils/interfaces.dto';
+import { TemporaryDB } from 'src/database/temporary-db';
+import { CreateTrackDTO } from './dto/create-track.dto';
 
 @Injectable()
 export class TracksService {
-    tracks: Track[] = [];
+    tracks: Track[];
+
+    constructor() {
+        this.tracks = []
+    }
 
     findAllTracks() {
-        return this.tracks;
+        console.log(this.tracks);
+        return TemporaryDB.tracks;
     }
 
     findTrackById( id: string) {
-        const track =  this.tracks.find((track) => track.id === id);
+        const track =  TemporaryDB.tracks.find((track) => track.id === id);
         const UUID = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
 
         if (!UUID.test(id)) {
@@ -26,26 +33,42 @@ export class TracksService {
 
     }
 
-    addTrack(trackInfo: CreateTrackDto) {
+    addTrack(trackInfo: CreateTrackDTO) {
         const id = randomUUID();
-        const artistId = null; // | uuid
-        const albumId = null; // | uuid
-        const newTrack = {id, ...trackInfo, artistId, albumId};
-
-        if (trackInfo.hasOwnProperty("name") && trackInfo.hasOwnProperty("duration")) {
-            if(typeof trackInfo.duration === "number" && typeof trackInfo.name === "string") {
-                this.tracks.push(newTrack);
-                return newTrack;
-            } else {
-                throw new HttpException("Bad Request", HttpStatus.BAD_REQUEST);
-            }
+        let artistId: string | null;
+        let albumId: (string | null);
+        if(!trackInfo.artistId) {
+            artistId = null;
         } else {
-            throw new HttpException("Bad Request", HttpStatus.BAD_REQUEST);
+            artistId = trackInfo.artistId;
         }
+
+        if(!trackInfo.albumId) {
+            albumId = null;
+        } else {
+            albumId = trackInfo.albumId;
+        }
+        const newTrack = {id, ...trackInfo, artistId, albumId};
+        // this.tracks.push(newTrack);
+        TemporaryDB.tracks.push(newTrack);
+        return newTrack;
+        
+
+        // if (trackInfo.hasOwnProperty("name") && trackInfo.hasOwnProperty("duration")) {
+        //     if(typeof trackInfo.duration === "number" && typeof trackInfo.name === "string") {
+        //         this.tracks.push(newTrack);
+        //         TemporaryDB.tracks.push(newTrack);
+        //         return newTrack;
+        //     } else {
+        //         throw new HttpException("Bad Request", HttpStatus.BAD_REQUEST);
+        //     }
+        // } else {
+        //     throw new HttpException("Bad Request", HttpStatus.BAD_REQUEST);
+        // }
     }
 
     updateTrackInfo(id: string, updatedTrackInfo: Partial<UpdateTrackDto>) {
-        const track = this.tracks.find((track) => track.id === id);
+        const track = TemporaryDB.tracks.find((track) => track.id === id);
         const UUID = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
 
         if(!UUID.test(id)) {
@@ -67,14 +90,14 @@ export class TracksService {
     }
 
     deleteTrack( id: string) {
-        const removedTrack  = this.tracks.find(((track) => track.id === id));
+        const removedTrack  = TemporaryDB.tracks.find(((track) => track.id === id));
         const UUID = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
         if(!UUID.test(id)) {
             throw new HttpException("Bad Request: Invalid Id", HttpStatus.BAD_REQUEST);   
         } else if (!removedTrack) {
             throw new HttpException("Track Not Found", HttpStatus.NOT_FOUND);
         } else {
-            this.tracks  = this.tracks.filter((track) => track.id !== id);
+            TemporaryDB.tracks = TemporaryDB.tracks.filter((track) => track.id !== id);
             return removedTrack;
         }
     }

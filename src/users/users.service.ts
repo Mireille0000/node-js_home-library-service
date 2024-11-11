@@ -72,7 +72,7 @@ export class UsersService {
         }
     }
 
-    deleteUser(@Param('id') id: string) {
+    deleteUser(id: string) {
         const UUIDRegEx = new RegExp(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/);
         const removedUser = this.users.find((user) => user.id === id);
         if (!UUIDRegEx.test(id)) {
@@ -81,9 +81,9 @@ export class UsersService {
             throw new HttpException('User Not Found', HttpStatus.NOT_FOUND)
         } 
         else {
-            const {password, ...resRemovedUser} = removedUser;
+            // const {password, ...resRemovedUser} = removedUser;
             this.users = this.users.filter((user) => user.id !== id);
-            return resRemovedUser;
+            // return resRemovedUser;
         }
     }
 

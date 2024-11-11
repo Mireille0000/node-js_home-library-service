@@ -1,21 +1,10 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, HttpCode, Param, Post, Put, ValidationPipe } from '@nestjs/common';
 import { TracksService } from './tracks.service';
-import { Track } from 'src/utils/interfaces';
 import { CreateTrackDto, UpdateTrackDto } from 'src/utils/interfaces.dto';
+import { CreateTrackDTO } from './dto/create-track.dto';
 
 @Controller('track')
 export class TracksController {
-    // GET 
-    // /track +
-    // /track/:id (id: uuid) +
-    // POST
-    // /track +
-    // error handling +
-    //  PUT
-    // /track/:id (id: uuid)
-    // error handling
-    // DELETE
-    // /track/:id
     constructor(private readonly trackService: TracksService) {
 
     }
@@ -35,7 +24,7 @@ export class TracksController {
     @Post()
     @Header("Content-Type", "application/json")
     @HttpCode(201)
-    addTrack(@Body() newUser: CreateTrackDto) {
+    addTrack(@Body(ValidationPipe) newUser: CreateTrackDTO) {
         return this.trackService.addTrack(newUser)
     }
 

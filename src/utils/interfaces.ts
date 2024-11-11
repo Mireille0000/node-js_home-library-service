@@ -29,7 +29,7 @@ export interface User {
   }
 
   export interface Favorites {
-    artists: string[]; // favorite artists ids
-    albums: string[]; // favorite albums ids
-    tracks: string[]; // favorite tracks ids
+    artists: Artist[]; // favorite artists ids
+    albums: Album[]; // favorite albums ids
+    tracks: Track[]; // favorite tracks ids
   }
