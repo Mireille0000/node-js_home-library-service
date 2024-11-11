@@ -1,19 +1,16 @@
-import { IsNotEmpty, IsString, isNotEmpty } from "class-validator";
-
-
 export interface CreateUserDto {
-    login: string;
-    password: string;
-  }
+  login: string;
+  password: string;
+}
 
-  export interface UpdatePasswordDto {
-    oldPassword: string;
-    newPassword: string;
-  }
+export interface UpdatePasswordDto {
+  oldPassword: string;
+  newPassword: string;
+} //
 
-  export interface CreateTrackDto {
-    name: string;
-    duration: number;
-  }
+export interface CreateTrackDto {
+  name: string;
+  duration: number;
+}
 
-  export interface UpdateTrackDto extends CreateTrackDto {}
+export type UpdateTrackDto = CreateTrackDto;
