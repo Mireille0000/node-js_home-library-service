@@ -6,9 +6,16 @@ import { readFileSync } from 'node:fs';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 const PORT = process.env.PORT;
+
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // prisma.user.create({})
 
   const swaggerDoc = yaml.load(
     readFileSync('doc/api.yaml', { encoding: 'utf-8' }),
@@ -18,7 +25,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(PORT);
   console.log(
-    `Swagger ${process.pid} works on the http://localhost:4000/doc`,
+    `Swagger ${process.pid} works on the http://localhost:${PORT}/doc`,
   );
 }
 

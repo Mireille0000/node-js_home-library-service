@@ -4,19 +4,24 @@ import { User } from 'src/utils/interfaces';
 import { CreateUserDto } from 'src/utils/interfaces.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
+import * as database from '../database/db';
+
 @Injectable()
 export class UsersService {
   users: Array<User> = [];
 
-  findAll() {
-    const users = this.users.map((user) => {
-      const { password, ...userWithoutPassward } = user;
-      return userWithoutPassward;
-    });
-    return users;
+  async findAll() {
+    const users = await database.pool.query('SELECT * FROM users');
+    return users.rows;
+    // const users = this.users.map((user) => {
+    //   const { password, ...userWithoutPassward } = user;
+    //   return userWithoutPassward;
+    // });
+    // return users;
   }
 
   findUserById(id: string) {
+    // CREATE
     const UUIDRegEx = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
@@ -44,7 +49,7 @@ export class UsersService {
     if (!user.login || !user.password) {
       throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
     } else {
-      this.users.push(newUser);
+      this.users.push(newUser); //query ADD INTO
     }
     const { password, ...resNewUser } = newUser;
 
