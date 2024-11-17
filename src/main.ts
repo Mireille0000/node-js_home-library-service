@@ -3,19 +3,14 @@ import { AppModule } from './app.module';
 import * as yaml from "js-yaml";
 import 'dotenv/config';
 import { readFileSync } from 'node:fs';
-import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import { OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
 const PORT = process.env.PORT;
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  // prisma.user.create({})
 
   const swaggerDoc = yaml.load(
     readFileSync('doc/api.yaml', { encoding: 'utf-8' }),

@@ -31,11 +31,6 @@ export class UsersService {
     const UUIDRegEx = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    // const users = this.users.map((user) => {
-    //   const { password, ...userWithoutPassword } = user;
-    //   return userWithoutPassword;
-    // });
-    // const user = users.find((user) => user.id === id);
     const user = await this.prisma.user.findFirst({
       where: { id }
     });

@@ -3,18 +3,24 @@ import { randomUUID } from 'crypto';
 import { Artist } from 'src/utils/interfaces';
 import { CreateArtistDTO } from './dto/create-artist.dto';
 import UpdateArtistDTO from './dto/update-artist.dto';
-import { TemporaryDB } from 'src/database/temporary-db';
+import { TemporaryDB } from 'src/database/temporary-db'; //
+import { PrismaService } from 'nestjs-prisma';
 
 @Injectable()
 export class ArtistsService {
   artists: Artist[] = [];
 
-  findAllArtists() {
-    return TemporaryDB.artists;
+  constructor(private readonly prisma: PrismaService){}
+
+  async findAllArtists() {
+    return await this.prisma.artist.findMany();
   }
 
-  findArtistById(id: string) {
-    const artist = TemporaryDB.artists.find((artist) => artist.id === id);
+  async findArtistById(id: string) {
+    // const artist = TemporaryDB.artists.find((artist) => artist.id === id);
+    const artist = await this.prisma.artist.findFirst({
+      where: { id }
+    })
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
@@ -28,19 +34,25 @@ export class ArtistsService {
     }
   }
 
-  createArtist(newArtist: CreateArtistDTO): Artist {
+  async createArtist(newArtist: CreateArtistDTO): Promise<Artist>{
     const id = randomUUID();
     const newArtistObj = { id, ...newArtist };
-    TemporaryDB.artists.push(newArtistObj);
-    TemporaryDB.favorites.artists.push(newArtistObj);
-    return newArtistObj;
+    const newArtistAdded = await this.prisma.artist.create({
+      data: newArtistObj
+    })
+    TemporaryDB.artists.push(newArtistObj); // remove
+    TemporaryDB.favorites.artists.push(newArtistObj); // remove
+    return newArtistAdded;
   }
 
-  updateArtist(id: string, updatedArtistInfo: UpdateArtistDTO) {
+  async updateArtist(id: string, updatedArtistInfo: UpdateArtistDTO) {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    const artist = TemporaryDB.artists.find((artist) => artist.id === id);
+    // const artist = TemporaryDB.artists.find((artist) => artist.id === id);
+    const artist = await this.prisma.artist.findFirst({
+      where: { id }
+    })
     // should correctly update artist match
 
     if (!UUID.test(id)) {
@@ -52,20 +64,27 @@ export class ArtistsService {
       throw new HttpException('Artist Not Found', HttpStatus.NOT_FOUND);
     } else {
       const updatedArtist = { ...artist, ...updatedArtistInfo };
+      await this.prisma.artist.update({
+        where: {id},
+        data: updatedArtist
+      })
       TemporaryDB.artists = TemporaryDB.artists.map((artist) => {
         if (artist.id === id) {
           return updatedArtist;
         }
         return artist;
-      });
+      }); // remove
       return updatedArtist;
     }
   }
 
-  deleteArtist(id: string) {
-    const artistToRemove = TemporaryDB.artists.find(
-      (artist) => artist.id === id,
-    );
+  async deleteArtist(id: string) {
+    // const artistToRemove = TemporaryDB.artists.find(
+    //   (artist) => artist.id === id,
+    // );
+    const artistToRemove = await this.prisma.artist.findFirst({
+      where: {id}
+    })
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
@@ -97,6 +116,10 @@ export class ArtistsService {
           (artist) => artist.id !== id,
         );
       }
+
+      await this.prisma.artist.delete({
+        where: { id }
+      })
       return artistToRemove;
     }
   }

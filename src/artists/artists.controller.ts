@@ -21,35 +21,35 @@ export class ArtistsController {
 
   @Get()
   @Header('Content-Type', 'application/json')
-  findAllArtists(): Artist[] {
-    return this.artistsService.findAllArtists();
+  async findAllArtists(): Promise <Artist[]> {
+    return await this.artistsService.findAllArtists();
   }
 
   @Get(':id')
   @Header('Content-Type', 'application/json')
-  findArtistById(@Param('id') id: string): Artist {
-    return this.artistsService.findArtistById(id);
+  async findArtistById(@Param('id') id: string): Promise<Artist> {
+    return await this.artistsService.findArtistById(id);
   }
 
   @Post()
   @Header('Content-Type', 'application/json')
   @HttpCode(201)
-  createArtist(@Body(ValidationPipe) newArtist: CreateArtistDTO) {
-    return this.artistsService.createArtist(newArtist);
+  async createArtist(@Body(ValidationPipe) newArtist: CreateArtistDTO) {
+    return await this.artistsService.createArtist(newArtist);
   }
 
   @Put(':id')
-  updateArtist(
+  async updateArtist(
     @Param('id') id: string,
     @Body(ValidationPipe) updatedAtristInfo: UpdateArtistDTO,
   ) {
-    return this.artistsService.updateArtist(id, updatedAtristInfo);
+    return await this.artistsService.updateArtist(id, updatedAtristInfo);
   }
 
   @Header('Content-Type', 'application/json')
   @HttpCode(204)
   @Delete(':id')
-  deleteArtist(@Param('id') id: string) {
-    return this.artistsService.deleteArtist(id);
+  async deleteArtist(@Param('id') id: string) {
+    return await this.artistsService.deleteArtist(id);
   }
 }

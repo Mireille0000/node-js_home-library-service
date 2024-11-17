@@ -5,6 +5,7 @@ import { ModuleRef } from '@nestjs/core';
 import { AlbumsService } from 'src/albums/albums.service';
 import { ArtistsService } from 'src/artists/artists.service';
 import { TemporaryDB } from 'src/database/temporary-db';
+import { PrismaService } from 'nestjs-prisma';
 
 @Injectable()
 export class FavoritesService {
@@ -15,7 +16,7 @@ export class FavoritesService {
   albumsService: AlbumsService;
   artistsService: ArtistsService;
 
-  constructor(private readonly moduleRef: ModuleRef) {
+  constructor(private readonly prisma: PrismaService, private readonly moduleRef: ModuleRef) {
     this.favorites = {
       artists: [],
       albums: [],
@@ -153,13 +154,16 @@ export class FavoritesService {
     }
   }
 
-  addArtistInFavs(id: string) {
+  async addArtistInFavs(id: string) {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
     this.artistsService = this.moduleRef.get(ArtistsService);
     const artists = this.artistsService.findAllArtists();
-    const artist = artists.find((artist) => artist.id === id);
+    // const artist = artists.find((artist) => artist.id === id);
+    const artist = await this.prisma.artist.findFirst({
+      where: {id}
+    });
     if (!UUID.test(id)) {
       throw new HttpException(
         'Bad Request: Invalid Id',
