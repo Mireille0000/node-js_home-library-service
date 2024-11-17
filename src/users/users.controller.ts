@@ -13,6 +13,7 @@ import { UsersService } from './users.service';
 import { User } from 'src/utils/interfaces';
 import { CreateUserDto } from 'src/utils/interfaces.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { CreateUserDTO } from './dto/create-user.dto';
 
 @Controller('user')
 export class UsersController {
@@ -22,36 +23,36 @@ export class UsersController {
 
   @Get()
   @Header('Content-Type', 'application/json')
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+    return await this.usersService.findAll();
   }
 
   @Get(':id')
   @Header('Content-Type', 'application/json')
-  findById(@Param('id') id: string) {
-    return this.usersService.findUserById(id);
+  async findById(@Param('id') id: string) {
+    return await this.usersService.findUserById(id);
   }
 
   @Post()
   @Header('Content-Type', 'application/json')
   @HttpCode(201)
-  addUser(@Body() user: CreateUserDto): Partial<User> {
-    return this.usersService.addUser(user);
+   async addUser(@Body() user: CreateUserDTO): Promise<Partial<User>> {
+     return await this.usersService.addUser(user);
   }
 
   @Put(':id')
   @Header('Content-Type', 'application/json')
-  updateUserPassword(
+  async updateUserPassword(
     @Param('id') id: string,
     @Body() updatedUserPassword: UpdatePasswordDto,
   ) {
-    return this.usersService.updateUserPassword(id, updatedUserPassword);
+    return await this.usersService.updateUserPassword(id, updatedUserPassword);
   }
 
   @Delete(':id')
   @Header('Content-Type', 'application/json')
   @HttpCode(204)
-  deleteUser(@Param('id') id: string) {
-    return this.usersService.deleteUser(id);
+  async deleteUser(@Param('id') id: string) {
+    return await this.usersService.deleteUser(id);
   }
 }

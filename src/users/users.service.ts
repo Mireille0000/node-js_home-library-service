@@ -1,37 +1,48 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { User } from 'src/utils/interfaces';
-import { CreateUserDto } from 'src/utils/interfaces.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-
-import * as database from '../database/db';
+import { PrismaService } from 'nestjs-prisma';
+// import * as database from '../database/db';
+import { CreateUserDTO } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
+  constructor(private readonly prisma: PrismaService){}
+
   users: Array<User> = [];
 
-  async findAll() {
-    const users = await database.pool.query('SELECT * FROM users');
-    return users.rows;
-    // const users = this.users.map((user) => {
-    //   const { password, ...userWithoutPassward } = user;
-    //   return userWithoutPassward;
-    // });
-    // return users;
+  async findAll() { 
+    return await this.prisma.user.findMany({
+      select: {
+        id: true,
+        login: true,
+        password: false,
+        version: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+    // const users = await database.pool.query('SELECT * FROM users');
+    // return users.rows;
   }
 
-  findUserById(id: string) {
-    // CREATE
+  async findUserById(id: string) {
     const UUIDRegEx = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    const users = this.users.map((user) => {
-      const { password, ...userWithoutPassward } = user;
-      return userWithoutPassward;
+    // const users = this.users.map((user) => {
+    //   const { password, ...userWithoutPassword } = user;
+    //   return userWithoutPassword;
+    // });
+    // const user = users.find((user) => user.id === id);
+    const user = await this.prisma.user.findFirst({
+      where: { id }
     });
-    const user = users.find((user) => user.id === id);
+
     if (user && UUIDRegEx.test(id)) {
-      return user;
+      const {password, ...response} = user
+      return response;
     } else if (!user && UUIDRegEx.test(id)) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     } else {
@@ -39,28 +50,28 @@ export class UsersService {
     }
   }
 
-  addUser(user: CreateUserDto) {
+  async addUser(user: CreateUserDTO): Promise<Partial<User>> {
     const id = randomUUID();
     const version = 1;
     const createdAt: number = new Date().getMilliseconds();
     const updatedAt: number = new Date().getMilliseconds();
     const newUser = { id, ...user, version, createdAt, updatedAt };
 
-    if (!user.login || !user.password) {
-      throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
-    } else {
-      this.users.push(newUser); //query ADD INTO
-    }
-    const { password, ...resNewUser } = newUser;
+    // this.users.push(newUser);
+    const addedUser = await this.prisma.user.create({
+      data: newUser
+    })
+    const { password, ...resNewUser } = addedUser;
 
     return resNewUser;
   }
 
-  updateUserPassword(id: string, updatedUserPassword: UpdatePasswordDto) {
+  async updateUserPassword(id: string, updatedUserPassword: UpdatePasswordDto) {
     const UUIDRegEx = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    const user = this.users.find((user) => user.id === id);
+    const users = await this.prisma.user.findMany();
+    const user = users.find((user) => user.id === id);
 
     if (!UUIDRegEx.test(id)) {
       throw new HttpException(
@@ -81,22 +92,32 @@ export class UsersService {
       user.version = user.version + 1;
       user.password = updatedUserPassword.newPassword;
       user.updatedAt = new Date().getMilliseconds();
-      const { password, ...updatedUser } = user;
-      return updatedUser;
+      const updatedUser = await this.prisma.user.update({
+        where: { id },
+        data: user
+      })
+
+      const { password, ...updated} = updatedUser
+      return updated;
     }
   }
 
-  deleteUser(id: string) {
+  async deleteUser(id: string) {
     const UUIDRegEx = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    const removedUser = this.users.find((user) => user.id === id);
+    const removedUser = await this.prisma.user.findFirst({
+      where: { id }
+    })
+
     if (!UUIDRegEx.test(id)) {
       throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
     } else if (!removedUser) {
       throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
     } else {
-      this.users = this.users.filter((user) => user.id !== id);
+      return this.prisma.user.delete({
+        where: {id}
+      })
     }
   }
 }

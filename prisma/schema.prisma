@@ -14,6 +14,43 @@ datasource db {
 }
 
 model User {
-    id      String @id @default(uuid())
-    name    String
+    id String @id @default(uuid())
+    login String
+    password String
+    version Int
+    createdAt Int
+    updatedAt Int
 }
+
+model Artist {
+  id String @id @default(uuid())
+  name String
+  grammy Boolean
+
+  // Favorites Favorites[] @relation(name: "Artist")
+}
+
+model Track {
+  id String @id @default(uuid())
+  name String
+  artistId String @default(uuid())
+  albumId String @default(uuid())
+  duration Int
+
+  // Favorites Favorites[] @relation(name: "Track")
+}
+
+model Album {
+  id String @id @default(uuid())
+  name String
+  year String
+  artistId String @default(uuid())
+
+  // Favorites Favorites[] @relation(name: "Album")
+}
+
+// model Favorites {
+//   atrists Artist[] @relation(name: "Artist")
+//   albums Album[] @relation(name: "Album")
+//   tracks Track[] @relation(name: "Track")
+// }
