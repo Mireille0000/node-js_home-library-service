@@ -21,36 +21,36 @@ export class AlbumsController {
 
   @Get()
   @Header('Content-Type', 'application/json')
-  findAllAlbums() {
-    return this.albumService.findAllAlbums();
+  async findAllAlbums() {
+    return await this.albumService.findAllAlbums();
   }
 
   @Get(':id')
   @Header('Content-Type', 'application/json')
-  findAlbumById(@Param('id') id: string): Album {
-    return this.albumService.findAlbumById(id);
+  async findAlbumById(@Param('id') id: string): Promise<Album> {
+    return await this.albumService.findAlbumById(id);
   }
 
   @Post()
   @Header('Content-Type', 'application/json')
   @HttpCode(201)
-  createAlbum(@Body(ValidationPipe) newAlbum: CreateAlbumDTO): Album {
-    return this.albumService.createAlbum(newAlbum);
+  async createAlbum(@Body(ValidationPipe) newAlbum: CreateAlbumDTO): Promise<Album> {
+    return await this.albumService.createAlbum(newAlbum);
   }
 
   @Put(':id')
   @Header('Content-Type', 'application/json')
-  updateAlbum(
+  async updateAlbum(
     @Param('id') id: string,
     @Body(ValidationPipe) updatedAlbum: UpdateAlbumDTO,
   ) {
-    return this.albumService.updateAlbum(id, updatedAlbum);
+    return await this.albumService.updateAlbum(id, updatedAlbum);
   }
 
   @Delete(':id')
   @Header('Content-Type', 'application/json')
   @HttpCode(204)
-  deleteAlbum(@Param('id') id: string) {
-    return this.albumService.deleteAlbum(id);
+  async deleteAlbum(@Param('id') id: string) {
+    return await this.albumService.deleteAlbum(id);
   }
 }

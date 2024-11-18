@@ -43,9 +43,9 @@ export class FavoritesController {
   @Post('album/:id')
   @Header('Content-Type', 'application/json')
   @HttpCode(201)
-  addAlbumToFavs(@Param('id') id: string) {
+  async addAlbumToFavs(@Param('id') id: string) {
     // status codes: 201, 400, 422
-    return this.favoritesService.addAlbumInFavs(id);
+    return await this.favoritesService.addAlbumInFavs(id);
   }
 
   @Delete('album/:id')

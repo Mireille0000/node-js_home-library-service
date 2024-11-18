@@ -93,13 +93,16 @@ export class FavoritesService {
     }
   }
 
-  addAlbumInFavs(id: string) {
+  async addAlbumInFavs(id: string) {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
     this.albumsService = this.moduleRef.get(AlbumsService);
-    const albums = this.albumsService.findAllAlbums();
-    const album = albums.find((album) => album.id === id);
+    // const albums = this.albumsService.findAllAlbums();
+    // const album = albums.find((album) => album.id === id);
+    const album = await this.prisma.album.findFirst({
+      where: { id }
+    });
     if (!UUID.test(id)) {
       throw new HttpException(
         'Bad Request: Invalid Id',
@@ -111,9 +114,9 @@ export class FavoritesService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     } else {
-      this.favorites.albums.push(album);
-      this.favoritesReq.albums.push(album.id); //
-      TemporaryDB.favorites.albums.push(album);
+      this.favorites.albums.push(album); // ??
+      this.favoritesReq.albums.push(album.id); // ??
+      TemporaryDB.favorites.albums.push(album); // remove
       return album;
     }
   }
@@ -159,7 +162,7 @@ export class FavoritesService {
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
     this.artistsService = this.moduleRef.get(ArtistsService);
-    const artists = this.artistsService.findAllArtists();
+    // const artists = this.artistsService.findAllArtists();
     // const artist = artists.find((artist) => artist.id === id);
     const artist = await this.prisma.artist.findFirst({
       where: {id}

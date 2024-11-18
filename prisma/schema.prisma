@@ -33,8 +33,8 @@ model Artist {
 model Track {
   id String @id @default(uuid())
   name String
-  artistId String @default(uuid())
-  albumId String @default(uuid())
+  artistId String? @default(uuid())
+  albumId String? @default(uuid())
   duration Int
 
   // Favorites Favorites[] @relation(name: "Track")
@@ -43,8 +43,8 @@ model Track {
 model Album {
   id String @id @default(uuid())
   name String
-  year String
-  artistId String @default(uuid())
+  year Int
+  artistId String? @default(uuid())
 
   // Favorites Favorites[] @relation(name: "Album")
 }

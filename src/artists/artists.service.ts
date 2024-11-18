@@ -99,23 +99,32 @@ export class ArtistsService {
     } else {
       TemporaryDB.artists = TemporaryDB.artists.filter(
         (artist) => artist.id !== id,
-      );
+      ); // remove
       TemporaryDB.tracks.filter((track) => {
         if (artistToRemove.id === track.artistId) {
           track.artistId = null;
         }
-      });
+      }); // remove
       TemporaryDB.albums.filter((album) => {
         if (artistToRemove.id === album.artistId) {
           album.artistId = null;
         }
-      });
+      }); // remove
 
       if (TemporaryDB.favorites.artists.find((artist) => artist.id === id)) {
         TemporaryDB.favorites.artists = TemporaryDB.favorites.artists.filter(
           (artist) => artist.id !== id,
         );
-      }
+      } // remove
+
+      await this.prisma.album.updateMany({
+        where: {
+          artistId: id,
+        },
+        data: {
+          artistId: null,
+        }
+      })
 
       await this.prisma.artist.delete({
         where: { id }
