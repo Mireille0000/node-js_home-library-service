@@ -50,7 +50,5 @@ model Album {
 }
 
 // model Favorites {
-//   atrists Artist[] @relation(name: "Artist")
-//   albums Album[] @relation(name: "Album")
-//   tracks Track[] @relation(name: "Track")
+//   atrists Artist[] 
 // }

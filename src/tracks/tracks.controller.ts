@@ -20,36 +20,36 @@ export class TracksController {
 
   @Get()
   @Header('Content-Type', 'application/json')
-  findAllTracks() {
-    return this.trackService.findAllTracks();
+  async findAllTracks() {
+    return await this.trackService.findAllTracks();
   }
 
   @Get(':id')
   @Header('Content-Type', 'application/json')
-  findTrackById(@Param('id') id: string) {
-    return this.trackService.findTrackById(id);
+  async findTrackById(@Param('id') id: string) {
+    return await this.trackService.findTrackById(id);
   }
 
   @Post()
   @Header('Content-Type', 'application/json')
   @HttpCode(201)
-  addTrack(@Body(ValidationPipe) newUser: CreateTrackDTO) {
-    return this.trackService.addTrack(newUser);
+  async addTrack(@Body(ValidationPipe) newUser: CreateTrackDTO) {
+    return await this.trackService.addTrack(newUser);
   }
 
   @Put(':id')
   @Header('Content-Type', 'application/json')
-  updateTrackInfo(
+  async updateTrackInfo(
     @Param('id') id: string,
     @Body() updatedTrackInfo: UpdateTrackDto,
   ) {
-    return this.trackService.updateTrackInfo(id, updatedTrackInfo);
+    return await this.trackService.updateTrackInfo(id, updatedTrackInfo);
   }
 
   @Delete(':id')
   @Header('Content-Type', 'application/json')
   @HttpCode(204)
-  deleteTrack(@Param('id') id: string) {
-    return this.trackService.deleteTrack(id);
+  async deleteTrack(@Param('id') id: string) {
+    return await this.trackService.deleteTrack(id);
   }
 }

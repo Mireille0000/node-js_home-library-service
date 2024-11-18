@@ -39,13 +39,16 @@ export class FavoritesService {
     return this.favoritesReq;
   }
 
-  addTrackInFavs(id: string) {
+  async addTrackInFavs(id: string) {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
     this.tracksService = this.moduleRef.get(TracksService);
     const tracks = this.tracksService.findAllTracks();
-    const track = tracks.find((track) => track.id === id);
+    // const track = tracks.find((track) => track.id === id);
+    const track = await this.prisma.track.findFirst({
+      where: {id}
+    })
     if (!UUID.test(id)) {
       throw new HttpException(
         'Bad Request: Invalid Id',

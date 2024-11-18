@@ -4,21 +4,25 @@ import { Track } from 'src/utils/interfaces';
 import { UpdateTrackDto } from 'src/utils/interfaces.dto';
 import { TemporaryDB } from 'src/database/temporary-db';
 import { CreateTrackDTO } from './dto/create-track.dto';
+import { PrismaService } from 'nestjs-prisma';
 
 @Injectable()
 export class TracksService {
   tracks: Track[];
 
-  constructor() {
+  constructor(private readonly prisma: PrismaService) {
     this.tracks = [];
   }
 
-  findAllTracks() {
-    return TemporaryDB.tracks;
+  async findAllTracks() {
+    return await this.prisma.track.findMany();
   }
 
-  findTrackById(id: string) {
-    const track = TemporaryDB.tracks.find((track) => track.id === id);
+  async findTrackById(id: string) {
+    // const track = TemporaryDB.tracks.find((track) => track.id === id);
+    const track = await this.prisma.track.findFirst({
+      where: {id}
+    })
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
@@ -32,7 +36,7 @@ export class TracksService {
     }
   }
 
-  addTrack(trackInfo: CreateTrackDTO) {
+  async addTrack(trackInfo: CreateTrackDTO) {
     const id = randomUUID();
     let artistId: string | null;
     let albumId: string | null;
@@ -48,12 +52,18 @@ export class TracksService {
       albumId = trackInfo.albumId;
     }
     const newTrack = { id, ...trackInfo, artistId, albumId };
+    const newTrackAdded = await this.prisma.track.create({
+      data: newTrack,
+    })
     TemporaryDB.tracks.push(newTrack);
-    return newTrack;
+    return newTrackAdded;
   }
 
-  updateTrackInfo(id: string, updatedTrackInfo: Partial<UpdateTrackDto>) {
-    const track = TemporaryDB.tracks.find((track) => track.id === id);
+  async updateTrackInfo(id: string, updatedTrackInfo: Partial<UpdateTrackDto>) {
+    // const track = TemporaryDB.tracks.find((track) => track.id === id);
+    const track = await this.prisma.track.findFirst({
+      where: {id}
+    })
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
@@ -75,12 +85,19 @@ export class TracksService {
         track.duration = updatedTrackInfo.duration;
       }
       const updatedTrack = { ...track, ...updatedTrackInfo };
+      await this.prisma.track.update({
+        where: {id},
+        data: updatedTrack
+      })
       return updatedTrack;
     }
   }
 
-  deleteTrack(id: string) {
-    const removedTrack = TemporaryDB.tracks.find((track) => track.id === id);
+  async deleteTrack(id: string) {
+    // const removedTrack = TemporaryDB.tracks.find((track) => track.id === id);
+    const removedTrack = await this.prisma.track.findFirst({
+      where: {id}
+    })
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
@@ -94,12 +111,16 @@ export class TracksService {
     } else {
       TemporaryDB.tracks = TemporaryDB.tracks.filter(
         (track) => track.id !== id,
-      );
+      ); // remove(done)
       if (TemporaryDB.favorites.tracks.find((track) => track.id === id)) {
         TemporaryDB.favorites.tracks = TemporaryDB.favorites.tracks.filter(
           (track) => track.id !== id,
         );
-      }
+      } //remove
+
+      await this.prisma.track.delete({
+        where: {id}
+      })
     }
   }
 }

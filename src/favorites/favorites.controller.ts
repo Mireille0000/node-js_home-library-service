@@ -19,24 +19,17 @@ export class FavoritesController {
     return this.favoritesService.findFavorites();
   }
 
-  // @Get()
-  // @Header("Content-Type", "application/json")
-  // findFavsIds() {
-  //     return this.favoritesService.findFavsIds()
-  // } // should be returned?
-
   @Post('track/:id')
   @Header('Content-Type', 'application/json')
   @HttpCode(201)
-  addTrackToFavs(@Param('id') id: string) {
-    return this.favoritesService.addTrackInFavs(id);
+  async addTrackToFavs(@Param('id') id: string) {
+    return await this.favoritesService.addTrackInFavs(id);
   }
 
   @Delete('track/:id')
   @Header('Content-Type', 'application/json')
   @HttpCode(204)
   deleteTrackFromFavs(@Param('id') id: string) {
-    // status codes: 204, 400, 404
     return this.favoritesService.deleteTrackFromFavs(id);
   }
 
@@ -44,7 +37,6 @@ export class FavoritesController {
   @Header('Content-Type', 'application/json')
   @HttpCode(201)
   async addAlbumToFavs(@Param('id') id: string) {
-    // status codes: 201, 400, 422
     return await this.favoritesService.addAlbumInFavs(id);
   }
 
@@ -52,7 +44,6 @@ export class FavoritesController {
   @Header('Content-Type', 'application/json')
   @HttpCode(204)
   deleteAlbumFromFavs(@Param('id') id: string) {
-    // status codes: 204, 400, 404
     return this.favoritesService.deleteAlbumFromFavs(id);
   }
 
@@ -60,7 +51,6 @@ export class FavoritesController {
   @Header('Content-Type', 'application/json')
   @HttpCode(201)
   async addArtistToFavs(@Param('id') id: string) {
-    // status codes: 201, 400, 422
     return await this.favoritesService.addArtistInFavs(id);
   }
 
@@ -68,7 +58,6 @@ export class FavoritesController {
   @Header('Content-Type', 'application/json')
   @HttpCode(204)
   deleteArtistFromFavs(@Param('id') id: string) {
-    // status codes: 204, 400, 404
     return this.favoritesService.deleteArtistFromFavs(id);
   }
 }

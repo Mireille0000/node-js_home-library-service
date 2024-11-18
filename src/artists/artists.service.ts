@@ -53,7 +53,6 @@ export class ArtistsService {
     const artist = await this.prisma.artist.findFirst({
       where: { id }
     })
-    // should correctly update artist match
 
     if (!UUID.test(id)) {
       throw new HttpException(
@@ -73,7 +72,7 @@ export class ArtistsService {
           return updatedArtist;
         }
         return artist;
-      }); // remove
+      }); // remove(done)
       return updatedArtist;
     }
   }
@@ -99,7 +98,7 @@ export class ArtistsService {
     } else {
       TemporaryDB.artists = TemporaryDB.artists.filter(
         (artist) => artist.id !== id,
-      ); // remove
+      ); // remove (done)
       TemporaryDB.tracks.filter((track) => {
         if (artistToRemove.id === track.artistId) {
           track.artistId = null;
@@ -109,7 +108,7 @@ export class ArtistsService {
         if (artistToRemove.id === album.artistId) {
           album.artistId = null;
         }
-      }); // remove
+      }); // remove (done)
 
       if (TemporaryDB.favorites.artists.find((artist) => artist.id === id)) {
         TemporaryDB.favorites.artists = TemporaryDB.favorites.artists.filter(
@@ -118,6 +117,15 @@ export class ArtistsService {
       } // remove
 
       await this.prisma.album.updateMany({
+        where: {
+          artistId: id,
+        },
+        data: {
+          artistId: null,
+        }
+      })
+
+      await this.prisma.track.updateMany({
         where: {
           artistId: id,
         },

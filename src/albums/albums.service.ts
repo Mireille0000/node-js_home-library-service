@@ -98,19 +98,28 @@ export class AlbumsService {
     } else {
       TemporaryDB.albums = TemporaryDB.albums.filter(
         (album) => album.id !== id,
-      );
+      ); // remove (done)
 
       TemporaryDB.tracks.filter((track) => {
         if (albumToRemove.id === track.albumId) {
           track.albumId = null;
         }
-      });
+      }); // remove(done)
 
       if (TemporaryDB.favorites.albums.find((album) => album.id === id)) {
         TemporaryDB.favorites.albums = TemporaryDB.favorites.albums.filter(
           (album) => album.id !== id,
         );
-      }
+      } // remove
+
+      await this.prisma.track.updateMany({
+        where: {
+          albumId: id,
+        },
+        data: {
+          albumId: null,
+        }
+      })
 
       await this.prisma.album.delete({
         where: {id}
