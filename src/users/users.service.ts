@@ -8,11 +8,11 @@ import { CreateUserDTO } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService){}
+  constructor(private readonly prisma: PrismaService) {}
 
   users: Array<User> = [];
 
-  async findAll() { 
+  async findAll() {
     return await this.prisma.user.findMany({
       select: {
         id: true,
@@ -20,8 +20,8 @@ export class UsersService {
         password: false,
         version: true,
         createdAt: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
     // const users = await database.pool.query('SELECT * FROM users');
     // return users.rows;
@@ -32,11 +32,11 @@ export class UsersService {
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
     const user = await this.prisma.user.findFirst({
-      where: { id }
+      where: { id },
     });
 
     if (user && UUIDRegEx.test(id)) {
-      const {password, ...response} = user
+      const { password, ...response } = user;
       return response;
     } else if (!user && UUIDRegEx.test(id)) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
@@ -54,8 +54,8 @@ export class UsersService {
 
     // this.users.push(newUser);
     const addedUser = await this.prisma.user.create({
-      data: newUser
-    })
+      data: newUser,
+    });
     const { password, ...resNewUser } = addedUser;
 
     return resNewUser;
@@ -89,10 +89,10 @@ export class UsersService {
       user.updatedAt = new Date().getMilliseconds();
       const updatedUser = await this.prisma.user.update({
         where: { id },
-        data: user
-      })
+        data: user,
+      });
 
-      const { password, ...updated} = updatedUser
+      const { password, ...updated } = updatedUser;
       return updated;
     }
   }
@@ -102,8 +102,8 @@ export class UsersService {
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
     const removedUser = await this.prisma.user.findFirst({
-      where: { id }
-    })
+      where: { id },
+    });
 
     if (!UUIDRegEx.test(id)) {
       throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
@@ -111,8 +111,8 @@ export class UsersService {
       throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
     } else {
       return this.prisma.user.delete({
-        where: {id}
-      })
+        where: { id },
+      });
     }
   }
 }

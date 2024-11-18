@@ -36,8 +36,8 @@ export class UsersController {
   @Post()
   @Header('Content-Type', 'application/json')
   @HttpCode(201)
-   async addUser(@Body() user: CreateUserDTO): Promise<Partial<User>> {
-     return await this.usersService.addUser(user);
+  async addUser(@Body() user: CreateUserDTO): Promise<Partial<User>> {
+    return await this.usersService.addUser(user);
   }
 
   @Put(':id')

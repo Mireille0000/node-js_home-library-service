@@ -16,7 +16,10 @@ export class FavoritesService {
   albumsService: AlbumsService;
   artistsService: ArtistsService;
 
-  constructor(private readonly prisma: PrismaService, private readonly moduleRef: ModuleRef) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly moduleRef: ModuleRef,
+  ) {
     this.favorites = {
       artists: [],
       albums: [],
@@ -30,25 +33,38 @@ export class FavoritesService {
     };
   }
 
-  findFavorites() {
-    // return this.favorites;
-    return TemporaryDB.favorites;
-  }
+  async findFavorites() {
+    const artists = await this.prisma.favoriteArtists.findMany({
+      include: {
+        artist: true,
+      },
+    });
+    const albums = await this.prisma.favoriteAlbums.findMany({
+      include: {
+        album: true,
+      },
+    });
+    const tracks = await this.prisma.favoriteTracks.findMany({
+      include: {
+        track: true,
+      },
+    });
 
-  findFavsIds() {
-    return this.favoritesReq;
+    const favorites = {
+      artists: artists.map((fav) => fav.artist),
+      albums: albums.map((fav) => fav.album),
+      tracks: tracks.map((fav) => fav.track),
+    };
+    return favorites;
   }
 
   async addTrackInFavs(id: string) {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    this.tracksService = this.moduleRef.get(TracksService);
-    const tracks = this.tracksService.findAllTracks();
-    // const track = tracks.find((track) => track.id === id);
     const track = await this.prisma.track.findFirst({
-      where: {id}
-    })
+      where: { id },
+    });
     if (!UUID.test(id)) {
       throw new HttpException(
         'Bad Request: Invalid Id',
@@ -60,18 +76,26 @@ export class FavoritesService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     } else {
-      this.favorites.tracks.push(track);
-      this.favoritesReq.tracks.push(track.id); //
-      TemporaryDB.favorites.tracks.push(track);
+      const trackId = id;
+      await this.prisma.favoriteTracks.create({
+        data: {
+          trackId,
+        },
+      });
+      // this.favorites.tracks.push(track); // remove
+      // this.favoritesReq.tracks.push(track.id); //
+      // TemporaryDB.favorites.tracks.push(track); // remove
       return track;
     }
   }
 
-  deleteTrackFromFavs(id: string) {
+  async deleteTrackFromFavs(id: string) {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    const track = this.favorites.tracks.find((track) => track.id === id);
+    const track = this.prisma.track.findFirst({
+      where: { id },
+    });
 
     if (!UUID.test(id)) {
       throw new HttpException(
@@ -81,18 +105,13 @@ export class FavoritesService {
     } else if (!track) {
       throw new HttpException('Track Not Found', HttpStatus.NOT_FOUND);
     } else {
-      this.favorites.tracks = this.favorites.tracks.filter(
-        (track) => track.id !== id,
-      );
-      this.favoritesReq.tracks = this.favoritesReq.tracks.filter(
-        (reqId) => reqId !== id,
-      ); //
-      if (TemporaryDB.tracks.find((track) => track.id === id)) {
-        TemporaryDB.favorites.tracks = TemporaryDB.favorites.tracks.filter(
-          (track) => track.id !== id,
-        );
-      }
-      // TemporaryDB.favorites.tracks = TemporaryDB.favorites.tracks.filter((track) => track.id !== id)
+      const trackId = id;
+
+      await this.prisma.favoriteTracks.deleteMany({
+        where: {
+          trackId,
+        },
+      });
     }
   }
 
@@ -100,11 +119,8 @@ export class FavoritesService {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    this.albumsService = this.moduleRef.get(AlbumsService);
-    // const albums = this.albumsService.findAllAlbums();
-    // const album = albums.find((album) => album.id === id);
     const album = await this.prisma.album.findFirst({
-      where: { id }
+      where: { id },
     });
     if (!UUID.test(id)) {
       throw new HttpException(
@@ -117,18 +133,23 @@ export class FavoritesService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     } else {
-      this.favorites.albums.push(album); // ??
-      this.favoritesReq.albums.push(album.id); // ??
-      TemporaryDB.favorites.albums.push(album); // remove
+      const albumId = id;
+      await this.prisma.favoriteAlbums.create({
+        data: {
+          albumId,
+        },
+      });
       return album;
     }
   }
 
-  deleteAlbumFromFavs(id: string) {
+  async deleteAlbumFromFavs(id: string) {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    const album = this.favorites.albums.find((album) => album.id === id);
+    const album = await this.prisma.album.findFirst({
+      where: { id },
+    });
 
     if (!UUID.test(id)) {
       throw new HttpException(
@@ -138,25 +159,12 @@ export class FavoritesService {
     } else if (!album) {
       throw new HttpException('Album Not Found', HttpStatus.NOT_FOUND);
     } else {
-      this.favorites.albums = this.favorites.albums.filter(
-        (album) => album.id !== id,
-      );
-      this.favoritesReq.albums = this.favoritesReq.albums.filter(
-        (reqId) => reqId !== id,
-      );
-      if (this.favorites.tracks.length > 0) {
-        this.favorites.tracks.filter((track) => {
-          if (album.id === track.albumId) {
-            track.albumId = null;
-          }
-        });
-      }
-
-      if (TemporaryDB.favorites.albums.find((album) => album.id === id)) {
-        TemporaryDB.favorites.albums = TemporaryDB.favorites.albums.filter(
-          (album) => album.id !== id,
-        );
-      }
+      const albumId = id;
+      await this.prisma.favoriteAlbums.deleteMany({
+        where: {
+          albumId,
+        },
+      });
     }
   }
 
@@ -164,11 +172,8 @@ export class FavoritesService {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    this.artistsService = this.moduleRef.get(ArtistsService);
-    // const artists = this.artistsService.findAllArtists();
-    // const artist = artists.find((artist) => artist.id === id);
     const artist = await this.prisma.artist.findFirst({
-      where: {id}
+      where: { id },
     });
     if (!UUID.test(id)) {
       throw new HttpException(
@@ -181,17 +186,23 @@ export class FavoritesService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     } else {
-      this.favorites.artists.push(artist);
-      this.favoritesReq.artists.push(artist.id); //
+      const artistId = id;
+      await this.prisma.favoriteArtists.create({
+        data: {
+          artistId,
+        },
+      });
       return artist;
     }
   }
 
-  deleteArtistFromFavs(id: string) {
+  async deleteArtistFromFavs(id: string) {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    const artist = this.favorites.artists.find((artist) => artist.id === id);
+    const artist = await this.prisma.artist.findFirst({
+      where: { id },
+    });
 
     if (!UUID.test(id)) {
       throw new HttpException(
@@ -201,34 +212,12 @@ export class FavoritesService {
     } else if (!artist) {
       throw new HttpException('Artist Not Found', HttpStatus.NOT_FOUND);
     } else {
-      this.favorites.artists = this.favorites.artists.filter(
-        (artist) => artist.id !== id,
-      );
-      console.log(this.favorites.tracks[0]);
-      this.favoritesReq.artists = this.favoritesReq.artists.filter(
-        (reqId) => reqId !== id,
-      );
-      if (this.favorites.tracks.length > 0) {
-        this.favorites.tracks.filter((track) => {
-          if (artist && artist.id === track.artistId) {
-            track.artistId = null;
-          }
-        });
-      }
-
-      if (this.favorites.tracks.length > 0) {
-        this.favorites.albums.filter((album) => {
-          if (artist && artist.id === album.artistId) {
-            album.artistId = null;
-          }
-        });
-      }
-
-      if (TemporaryDB.favorites.artists.find((artist) => artist.id === id)) {
-        TemporaryDB.favorites.artists = TemporaryDB.favorites.artists.filter(
-          (artist) => artist.id !== id,
-        );
-      }
+      const artistId = id;
+      await this.prisma.favoriteArtists.deleteMany({
+        where: {
+          artistId,
+        },
+      });
     }
   }
 }

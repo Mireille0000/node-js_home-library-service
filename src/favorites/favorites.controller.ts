@@ -15,8 +15,8 @@ export class FavoritesController {
 
   @Get()
   @Header('Content-Type', 'application/json')
-  findFavorites() {
-    return this.favoritesService.findFavorites();
+  async findFavorites() {
+    return await this.favoritesService.findFavorites();
   }
 
   @Post('track/:id')
@@ -43,8 +43,8 @@ export class FavoritesController {
   @Delete('album/:id')
   @Header('Content-Type', 'application/json')
   @HttpCode(204)
-  deleteAlbumFromFavs(@Param('id') id: string) {
-    return this.favoritesService.deleteAlbumFromFavs(id);
+  async deleteAlbumFromFavs(@Param('id') id: string) {
+    return await this.favoritesService.deleteAlbumFromFavs(id);
   }
 
   @Post('artist/:id')
@@ -57,7 +57,7 @@ export class FavoritesController {
   @Delete('artist/:id')
   @Header('Content-Type', 'application/json')
   @HttpCode(204)
-  deleteArtistFromFavs(@Param('id') id: string) {
-    return this.favoritesService.deleteArtistFromFavs(id);
+  async deleteArtistFromFavs(@Param('id') id: string) {
+    return await this.favoritesService.deleteArtistFromFavs(id);
   }
 }

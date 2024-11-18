@@ -9,7 +9,7 @@ import { PrismaService } from 'nestjs-prisma';
 @Injectable()
 export class AlbumsService {
   albums: Album[] = [];
-  constructor(private readonly prisma: PrismaService){}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAllAlbums() {
     return await this.prisma.album.findMany();
@@ -19,10 +19,9 @@ export class AlbumsService {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    // const album = TemporaryDB.albums.find((album) => album.id === id);
     const album = await this.prisma.album.findFirst({
-      where: { id }
-    })
+      where: { id },
+    });
 
     if (!UUID.test(id)) {
       throw new HttpException(
@@ -36,7 +35,7 @@ export class AlbumsService {
     }
   }
 
-  async createAlbum(newAlbum: CreateAlbumDTO): Promise <Album> {
+  async createAlbum(newAlbum: CreateAlbumDTO): Promise<Album> {
     const id = randomUUID();
     let artistId: string | null;
     if (!newAlbum.artistId) {
@@ -46,10 +45,8 @@ export class AlbumsService {
     }
     const newAlbumObj = { id, ...newAlbum, artistId };
     const newAlbumAdded = await this.prisma.album.create({
-      data: newAlbumObj
-    })
-    TemporaryDB.albums.push(newAlbumObj);
-    TemporaryDB.favorites.albums.push(newAlbumObj);
+      data: newAlbumObj,
+    });
     return newAlbumAdded;
   }
 
@@ -57,7 +54,9 @@ export class AlbumsService {
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
     );
-    const album = TemporaryDB.albums.find((album) => album.id === id);
+    const album = await this.prisma.album.findFirst({
+      where: { id },
+    });
     if (!UUID.test(id)) {
       throw new HttpException(
         'Bad Request: Invalid Id',
@@ -67,22 +66,18 @@ export class AlbumsService {
       throw new HttpException('Album not Found', HttpStatus.NOT_FOUND);
     } else {
       const updatedAlbumObj = { ...album, ...updatedAlbum };
-
-      TemporaryDB.albums = TemporaryDB.albums.map((album) => {
-        if (album.id === id) {
-          return updatedAlbumObj;
-        }
-        return album;
+      await this.prisma.album.update({
+        where: { id },
+        data: updatedAlbumObj,
       });
       return updatedAlbumObj;
     }
   }
 
   async deleteAlbum(id: string) {
-    // const albumToRemove = TemporaryDB.albums.find((album) => album.id === id);
     const albumToRemove = await this.prisma.album.findFirst({
-      where: {id}
-    })
+      where: { id },
+    });
 
     const UUID = new RegExp(
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
@@ -96,34 +91,26 @@ export class AlbumsService {
     } else if (!albumToRemove) {
       throw new HttpException('Album Not Found', HttpStatus.NOT_FOUND);
     } else {
-      TemporaryDB.albums = TemporaryDB.albums.filter(
-        (album) => album.id !== id,
-      ); // remove (done)
-
-      TemporaryDB.tracks.filter((track) => {
-        if (albumToRemove.id === track.albumId) {
-          track.albumId = null;
-        }
-      }); // remove(done)
-
-      if (TemporaryDB.favorites.albums.find((album) => album.id === id)) {
-        TemporaryDB.favorites.albums = TemporaryDB.favorites.albums.filter(
-          (album) => album.id !== id,
-        );
-      } // remove
-
       await this.prisma.track.updateMany({
         where: {
           albumId: id,
         },
         data: {
           albumId: null,
-        }
-      })
+        },
+      });
+
+      const albumId = id;
+
+      await this.prisma.favoriteAlbums.deleteMany({
+        where: {
+          albumId,
+        },
+      });
 
       await this.prisma.album.delete({
-        where: {id}
-      })
+        where: { id: albumId },
+      });
     }
   }
 }

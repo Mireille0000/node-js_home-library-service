@@ -34,7 +34,9 @@ export class AlbumsController {
   @Post()
   @Header('Content-Type', 'application/json')
   @HttpCode(201)
-  async createAlbum(@Body(ValidationPipe) newAlbum: CreateAlbumDTO): Promise<Album> {
+  async createAlbum(
+    @Body(ValidationPipe) newAlbum: CreateAlbumDTO,
+  ): Promise<Album> {
     return await this.albumService.createAlbum(newAlbum);
   }
 

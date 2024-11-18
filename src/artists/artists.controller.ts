@@ -21,7 +21,7 @@ export class ArtistsController {
 
   @Get()
   @Header('Content-Type', 'application/json')
-  async findAllArtists(): Promise <Artist[]> {
+  async findAllArtists(): Promise<Artist[]> {
     return await this.artistsService.findAllArtists();
   }
 
