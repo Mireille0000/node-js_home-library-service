@@ -81,10 +81,9 @@ FROM node:${NODE_VERSION}
 WORKDIR /app
 
 COPY package*.json ./
+COPY . .
 
 RUN npm install
-
-COPY . .
 
 ENV PORT=4000
 

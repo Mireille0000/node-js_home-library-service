@@ -11,11 +11,11 @@ const PORT = process.env.PORT;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const swaggerDoc = yaml.load(
-    readFileSync('doc/api.yaml', { encoding: 'utf-8' }),
-  ) as OpenAPIObject;
+  // const swaggerDoc = yaml.load(
+  //   readFileSync('doc/api.yaml', { encoding: 'utf-8' }),
+  // ) as OpenAPIObject;
 
-  SwaggerModule.setup('doc', app, swaggerDoc);
+  // SwaggerModule.setup('doc', app, swaggerDoc);
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(PORT);
   console.log(
