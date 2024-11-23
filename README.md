@@ -25,7 +25,14 @@ npm start
 ### With Docker
 
 ```
-docker compose up -d
+docker-compose up --build
+```
+
+If db prisma error:
+
+```
+docker exec -it nest-app sh 
+npx prisma migrate dev
 ```
 
 After starting the app on port (4000 as default) you can open
