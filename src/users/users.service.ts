@@ -5,6 +5,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { PrismaService } from 'nestjs-prisma';
 // import * as database from '../database/db';
 import { CreateUserDTO } from './dto/create-user.dto';
+import { encodePassword } from 'src/auth/utils/bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -45,14 +46,23 @@ export class UsersService {
     }
   }
 
+  async findByLogin(login: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {login}
+    });
+    return user;
+  }
+
   async addUser(user: CreateUserDTO): Promise<Partial<User>> {
     const id = randomUUID();
     const version = 1;
     const createdAt: number = new Date().getMilliseconds();
     const updatedAt: number = new Date().getMilliseconds();
-    const newUser = { id, ...user, version, createdAt, updatedAt };
+    const login = user.login;
+    const userPassword = encodePassword(user.password);
+    const newUser = { id, login, password: userPassword, version, createdAt, updatedAt };
+    console.log(newUser);
 
-    // this.users.push(newUser);
     const addedUser = await this.prisma.user.create({
       data: newUser,
     });
