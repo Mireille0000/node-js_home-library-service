@@ -6,6 +6,9 @@ import { PrismaService } from 'nestjs-prisma';
 // import * as database from '../database/db';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { encodePassword } from 'src/auth/utils/bcrypt';
+import * as bcrypt from 'bcrypt'
+
+import { User as PrismaUser } from '@prisma/client'; //
 
 @Injectable()
 export class UsersService {
@@ -53,59 +56,79 @@ export class UsersService {
     return user;
   }
 
-  async addUser(user: CreateUserDTO): Promise<Partial<User>> {
+  async addUser(user: PrismaUser): Promise<Partial<User>>{
+    if(!user.login || !user.password) {
+      throw new HttpException("Bad Request", HttpStatus.BAD_REQUEST);
+    }
+
     const id = randomUUID();
     const version = 1;
-    const createdAt: number = new Date().getMilliseconds();
-    const updatedAt: number = new Date().getMilliseconds();
+    const createdAt = new Date();
+    const updatedAt = new Date();
     const login = user.login;
-    const userPassword = encodePassword(user.password);
-    const newUser = { id, login, password: userPassword, version, createdAt, updatedAt };
-    console.log(newUser);
+    const userPassword = encodePassword(user?.password);
+
+    const newUser = { 
+      id, 
+      login, 
+      password: userPassword, 
+      version, 
+      createdAt, 
+      updatedAt };
 
     const addedUser = await this.prisma.user.create({
       data: newUser,
     });
-    const { password, ...resNewUser } = addedUser;
-
-    return resNewUser;
-  }
-
-  async updateUserPassword(id: string, updatedUserPassword: UpdatePasswordDto) {
-    const UUIDRegEx = new RegExp(
-      /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
-    );
-    const users = await this.prisma.user.findMany();
-    const user = users.find((user) => user.id === id);
-
-    if (!UUIDRegEx.test(id)) {
-      throw new HttpException(
-        'Bad Request: Id is invalid',
-        HttpStatus.BAD_REQUEST,
-      );
-    } else if (
-      !updatedUserPassword.oldPassword &&
-      !updatedUserPassword.newPassword
-    ) {
-      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
-    } else if (!user) {
-      throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
-    } else if (updatedUserPassword.oldPassword !== user.password) {
-      console.log(updatedUserPassword.newPassword);
-      throw new HttpException('Old Password is wrong', HttpStatus.FORBIDDEN);
-    } else {
-      user.version = user.version + 1;
-      user.password = updatedUserPassword.newPassword;
-      user.updatedAt = new Date().getMilliseconds();
-      const updatedUser = await this.prisma.user.update({
-        where: { id },
-        data: user,
-      });
-
-      const { password, ...updated } = updatedUser;
-      return updated;
+    const { password, ...userWthoutPassword } = addedUser;
+    const response = {
+      ...userWthoutPassword,
+      createdAt: userWthoutPassword.createdAt.getTime(),
+      updatedAt: userWthoutPassword.updatedAt.getTime()
     }
+
+    return response;
   }
+
+  async updateUserPassword(
+    id: string,
+    updatedUserPassword: UpdatePasswordDto,
+  ) {
+
+    const UUIDRegEx = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+    if (!UUIDRegEx.test(id)) {
+      throw new HttpException('Bad Request: Id is invalid', HttpStatus.BAD_REQUEST);
+    }
+  
+    if (!updatedUserPassword.oldPassword || !updatedUserPassword.newPassword) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
+    }
+  
+    const isOldPasswordCorrect = bcrypt.compareSync(updatedUserPassword.oldPassword, user.password);
+    if (!isOldPasswordCorrect) {
+      throw new HttpException('Old Password is wrong', HttpStatus.FORBIDDEN);
+    }
+  
+    const encodedNewPassword = encodePassword(updatedUserPassword.newPassword);
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        password: encodedNewPassword,
+        version: user.version + 1,
+        updatedAt: new Date(),
+      },
+    });
+  
+    const { password, ...updated } = updatedUser; 
+    const response = {...updated, createdAt: updatedUser.createdAt.getTime(), updatedAt: updatedUser.updatedAt.getTime()}
+    return response;
+  }
+  
 
   async deleteUser(id: string) {
     const UUIDRegEx = new RegExp(

@@ -117,11 +117,11 @@ security:
   - bearerAuth: []
 
 paths:
-  /login:
+  /auth/login:
     post:
       tags:
         - Login
-      security: []
+      security: [ ]
       summary: Login
       description: Logins a user and returns a JWT-token
       requestBody:
@@ -154,7 +154,7 @@ paths:
                 description: JWT Token
         403:
           description: Incorrect login or password
-  /signup:
+  /auth/signup:
     post:
       tags:
         - Signup
