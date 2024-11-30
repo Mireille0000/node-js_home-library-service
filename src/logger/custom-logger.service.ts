@@ -2,6 +2,11 @@ import { ConsoleLogger, Injectable, LoggerService } from '@nestjs/common';
 
 @Injectable()
 export class CustomLoggerService extends ConsoleLogger implements LoggerService{
+    constructor(context?: string) {
+        super();
+        this.setLogLevels(['log', 'error', 'warn']);
+        this.setContext(context);
+    }
     log(message: any, context?: string): any{
         const entry = `${context}\t${message}`;
         super.log(context, message);
