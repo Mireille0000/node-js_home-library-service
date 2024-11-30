@@ -4,13 +4,18 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { CustomLoggerService } from './logger/custom-logger.service';
 
 
 
 const PORT = process.env.PORT || 4000;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+  app.useLogger(app.get(CustomLoggerService));
+
   app.useGlobalPipes(new ValidationPipe()); //
   const config = new DocumentBuilder()
     .setTitle('Home Library API')
@@ -21,8 +26,6 @@ async function bootstrap() {
   SwaggerModule.setup('doc', app, document);
 
   await app.listen(PORT);
-
-
   console.log(
     `Swagger ${process.pid} works on the http://localhost:${PORT}/doc`,
   );

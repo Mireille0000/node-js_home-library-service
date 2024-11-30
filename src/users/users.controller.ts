@@ -8,16 +8,14 @@ import {
   Param,
   Post,
   Put,
-  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {User as PrismaUser} from '@prisma/client'
-import { User } from 'src/utils/interfaces';
+// import { User } from 'src/utils/interfaces';
 // import { CreateUserDto } from 'src/utils/interfaces.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { CreateUserDTO } from './dto/create-user.dto';
-// import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { Public } from 'src/auth/decorators/decorator';
+// import { CreateUserDTO } from './dto/create-user.dto';
+// import { Public } from 'src/auth/decorators/decorator';
 
 @Controller('user')
 export class UsersController {

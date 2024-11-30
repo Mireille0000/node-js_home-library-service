@@ -25,12 +25,11 @@ export class AuthService {
         const userByLogin = await this.usersService.findByLogin(user.login);
         const payload = {sub: userByLogin.id, username: userByLogin.login};
         const isValidPassword = await bcrypt.compare(user.password, userByLogin.password);
-        console.log(isValidPassword)
      
             if(!isValidPassword) {
                 throw new HttpException("Authentication Failed", HttpStatus.FORBIDDEN);
             }
-            console.log(payload.username)
+           
             const accessToken = await this.jwtService.signAsync(payload, {
                 secret:  process.env.JWT_SECRET_KEY || 'secret123123',
                 expiresIn: process.env.TOKEN_REFRESH_EXPIRE_TIME || '24h',
