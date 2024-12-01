@@ -5,6 +5,7 @@ dotenv.config();
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { CustomLoggerService } from './logger/custom-logger.service';
+import { LoggingInterceptor } from './logging-interceptor/logging.interceptor';
 
 
 
@@ -14,8 +15,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
+  app.useGlobalInterceptors(new LoggingInterceptor());
   app.useLogger(app.get(CustomLoggerService));
-
+  
   app.useGlobalPipes(new ValidationPipe()); //
   const config = new DocumentBuilder()
     .setTitle('Home Library API')

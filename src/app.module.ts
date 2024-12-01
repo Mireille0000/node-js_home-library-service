@@ -38,10 +38,10 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
       useClass: LoggerMiddleware
     }],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(LoggerMiddleware)
-      .forRoutes("*")
-  }
+export class AppModule /*implements NestModule*/ {
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer
+  //     .apply(LoggerMiddleware)
+  //     .forRoutes('*')
+  // }
 }

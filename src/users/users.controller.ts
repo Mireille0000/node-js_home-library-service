@@ -14,6 +14,7 @@ import {User as PrismaUser} from '@prisma/client'
 // import { User } from 'src/utils/interfaces';
 // import { CreateUserDto } from 'src/utils/interfaces.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { CustomLoggerService } from 'src/logger/custom-logger.service';
 // import { CreateUserDTO } from './dto/create-user.dto';
 // import { Public } from 'src/auth/decorators/decorator';
 

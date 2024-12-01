@@ -16,7 +16,6 @@ export class LoggerMiddleware implements NestMiddleware {
 
       const queryParam = JSON.stringify(query);
       const bodyParam = JSON.stringify(body);
-      console.log(ip);
 
       this.logger.log(
         `${method} ${originalUrl} ${queryParam} ${bodyParam} ${statusCode} ${contentLength} - ${userAgent} ${ip}`,

@@ -1,5 +1,7 @@
 import { ConsoleLogger, Injectable, LoggerService } from '@nestjs/common';
 
+import { access, constants, writeFile } from 'fs';
+
 @Injectable()
 export class CustomLoggerService extends ConsoleLogger implements LoggerService{
     constructor(context?: string) {
@@ -7,16 +9,37 @@ export class CustomLoggerService extends ConsoleLogger implements LoggerService{
         this.setLogLevels(['log', 'error', 'warn']);
         this.setContext(context);
     }
-    log(message: any, context?: string): any{
+
+    async logToConsole (entry: any) {
+        const formattedEntry = `${Intl.DateTimeFormat('en-US', {
+            dateStyle: 'short',
+            timeStyle: 'short',
+            // timeZone: 'France/Paris',
+        }).format(new Date())} ${entry}\n`;
+
+        try {
+            process.stdout.write(`${formattedEntry}`)
+        } catch (error) {
+            if (error instanceof Error) console.error(error.message);
+        }
+
+    }
+
+    async log(message: any, context?: string) {
         const entry = `${context}\t${message}`;
+        await this.logToConsole(entry);
         super.log(context, message);
     }
 
-    fatal(message: any, ...optionalParams: any[]){}
-
-    error(message: any, ...optionalParams: any[]){}
+    async error(message: any, context: string){
+        const entry = `${context}\t${message}`;
+        await this.logToConsole(entry);
+        super.log(context, message);
+    }
 
     warn(message: any, ...optionalParams: any[]){}
+
+    fatal(message: any, ...optionalParams: any[]){}
 
     // 
 
