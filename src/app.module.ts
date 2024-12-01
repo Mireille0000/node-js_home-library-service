@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -8,10 +8,10 @@ import { AlbumsModule } from './albums/albums.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { LoggerMiddleware } from './logger/logger.middleware';
 import { CustomLoggerService } from './logger/custom-logger.service';
 import { HttpExceptionFilter } from './http-exception/http-exception.filter';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './logging-interceptor/logging.interceptor';
 
 @Module({
   imports: [
@@ -35,13 +35,10 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: LoggerMiddleware
-    }],
+      useClass: LoggingInterceptor
+    }
+  ],
 })
-export class AppModule /*implements NestModule*/ {
-  // configure(consumer: MiddlewareConsumer) {
-  //   consumer
-  //     .apply(LoggerMiddleware)
-  //     .forRoutes('*')
-  // }
+export class AppModule {
+
 }

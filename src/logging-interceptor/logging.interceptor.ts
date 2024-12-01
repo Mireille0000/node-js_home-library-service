@@ -1,10 +1,11 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-import { Observable, tap } from 'rxjs';
+import { catchError, Observable, tap } from 'rxjs';
 import { CustomLoggerService } from 'src/logger/custom-logger.service';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  private logger = new CustomLoggerService();
+  constructor(private readonly logger: CustomLoggerService){}
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request =  context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse()
@@ -14,9 +15,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const userAgent = request.get("user-agent") || "";
 
     return next.handle().pipe(
-      tap(() => {
-        const contentLength = response.get("content-length");
-
+      tap(async () => {
         const queryParam = JSON.stringify(query);
         const bodyParam = JSON.stringify(body);
 
@@ -24,6 +23,15 @@ export class LoggingInterceptor implements NestInterceptor {
           `${method} ${originalUrl} ${queryParam} ${bodyParam} ${statusCode} - ${userAgent} ${ip}`,
           controller
         );
+
+        catchError((err) => {
+          this.logger.error(
+            `${method} ${originalUrl} - Error: ${err.message}`,
+            controller
+          );
+          throw err;
+        })
+
       })
     );
   }

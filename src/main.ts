@@ -7,16 +7,15 @@ import { ValidationPipe } from '@nestjs/common';
 import { CustomLoggerService } from './logger/custom-logger.service';
 import { LoggingInterceptor } from './logging-interceptor/logging.interceptor';
 
-
-
 const PORT = process.env.PORT || 4000;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
-  app.useGlobalInterceptors(new LoggingInterceptor());
   app.useLogger(app.get(CustomLoggerService));
+  const logger = app.get(CustomLoggerService);
+  app.useGlobalInterceptors(new LoggingInterceptor(logger));
   
   app.useGlobalPipes(new ValidationPipe()); //
   const config = new DocumentBuilder()

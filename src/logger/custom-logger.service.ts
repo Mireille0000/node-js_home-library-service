@@ -1,24 +1,31 @@
 import { ConsoleLogger, Injectable, LoggerService } from '@nestjs/common';
 
-import { access, constants, writeFile } from 'fs';
+import { access, constants, existsSync, writeFile } from 'fs';
+import { appendFile, mkdir } from 'fs/promises';
+import { dirname, join, resolve } from 'path';
+import { promisify } from 'util';
+
+
 
 @Injectable()
 export class CustomLoggerService extends ConsoleLogger implements LoggerService{
     constructor(context?: string) {
         super();
         this.setLogLevels(['log', 'error', 'warn']);
-        this.setContext(context);
     }
 
-    async logToConsole (entry: any) {
+    async writeToLogFile (entry: any) {
         const formattedEntry = `${Intl.DateTimeFormat('en-US', {
             dateStyle: 'short',
             timeStyle: 'short',
-            // timeZone: 'France/Paris',
         }).format(new Date())} ${entry}\n`;
+        const dirName =  resolve(process.cwd(), 'logs');
+        const pathFileName = resolve(dirName, 'logFile.log');
+        console.log(dirName, pathFileName);
 
         try {
-            process.stdout.write(`${formattedEntry}`)
+            await mkdir(dirName,  { recursive: true })
+            await appendFile(pathFileName, formattedEntry); 
         } catch (error) {
             if (error instanceof Error) console.error(error.message);
         }
@@ -26,15 +33,15 @@ export class CustomLoggerService extends ConsoleLogger implements LoggerService{
     }
 
     async log(message: any, context?: string) {
-        const entry = `${context}\t${message}`;
-        await this.logToConsole(entry);
-        super.log(context, message);
+        const entry = `${message}\t${context}`;
+        await this.writeToLogFile(entry);
+        super.log(message, context);
     }
 
     async error(message: any, context: string){
-        const entry = `${context}\t${message}`;
-        await this.logToConsole(entry);
-        super.log(context, message);
+        const entry = `${message}\t${context}`;
+        await this.writeToLogFile(entry);
+        super.error(message, context);
     }
 
     warn(message: any, ...optionalParams: any[]){}
