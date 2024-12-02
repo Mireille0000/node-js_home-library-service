@@ -22,10 +22,44 @@ npm install
 ```
 npm start
 ```
+### With Docker
+
+```
+docker-compose up --build
+```
+
+If db prisma error:
+
+```
+docker exec -it nest-app sh 
+npx prisma migrate dev
+```
+
+To check if logs file is written:
+```
+docker exec -it <container_id> sh
+cd /app/logs
+ls -l
+cat logFile.log 
+```
+
+How to know container_id:
+
+```
+docker ps
+```
+
+If you wish to copy logs file locally: 
+
+```
+docker cp <container_id>:/app/logs/logFile.log ./logFile.log
+```
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
+
+
 
 ## Testing
 

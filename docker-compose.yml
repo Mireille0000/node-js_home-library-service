@@ -1,0 +1,77 @@
+services:
+  home-lib-app:
+      build:
+        context: .
+        dockerfile: Dockerfile-app
+      env_file:
+      - .env
+      container_name: nest-app
+      ports:
+        - 4000:4000
+      depends_on:
+        nest-postgres-serv:
+          condition: service_healthy
+      networks:
+        - app-network
+      environment:
+        DATABASE_URL: postgresql://prisma:topsecret@nest-postgres-serv:5432/homelibdb?schema=public
+        JWT_SECRET_KEY: secret123123
+        DEBUG: prisma:engine
+
+  nest-postgres-serv:
+    build:
+      context: .
+      dockerfile: Dockerfile-psql-db
+    env_file:
+      - .env
+    container_name: nest-postgres-serv
+    environment:
+      POSTGRES_USER: prisma
+      POSTGRES_PASSWORD: topsecret
+      POSTGRES_DB: homelibdb
+    ports:
+      - 5432:5432
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prisma -d homelibdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # volumes:
+    #   - nest-postgres-serv:/var/lib/postgresql/data
+
+networks:
+  app-network:
+    driver: bridge
+
+
+
+ 
+  # nest-api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: nest-api
+  #   restart: always
+  #   ports:
+  #     - '4000:4000'
+  #   depends_on:
+  #     - nest-postgres
+  #   env_file:
+  #     - .env
+  
+#   nest-postgres-serv:
+#     image: postgres:14
+#     container_name: nest-postgres-serv
+#     restart: always
+#     ports:
+#       - 5432:5432
+#     env_file:
+#       - .env
+#     volumes:
+#       - nest-postgres-serv:/var/lib/postgresql/data
+
+# volumes:
+#   nest-postgres-serv:
+#     name: nest-postgres-db
