@@ -13,8 +13,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
-  app.useLogger(app.get(CustomLoggerService));
   const logger = app.get(CustomLoggerService);
+  app.useLogger(logger);
   app.useGlobalInterceptors(new LoggingInterceptor(logger));
   
   app.useGlobalPipes(new ValidationPipe()); //

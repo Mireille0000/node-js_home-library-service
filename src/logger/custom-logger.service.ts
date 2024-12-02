@@ -21,7 +21,6 @@ export class CustomLoggerService extends ConsoleLogger implements LoggerService{
         }).format(new Date())} ${entry}\n`;
         const dirName =  resolve(process.cwd(), 'logs');
         const pathFileName = resolve(dirName, 'logFile.log');
-        console.log(dirName, pathFileName);
 
         try {
             await mkdir(dirName,  { recursive: true })
