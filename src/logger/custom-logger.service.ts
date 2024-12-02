@@ -11,7 +11,7 @@ import { promisify } from 'util';
 export class CustomLoggerService extends ConsoleLogger implements LoggerService{
     constructor(context?: string) {
         super();
-        this.setLogLevels(['log', 'error', 'warn']);
+        this.setLogLevels(['log', 'error', 'warn', 'fatal', 'debug', 'verbose']);
     }
 
     async writeToLogFile (entry: any) {
@@ -43,15 +43,29 @@ export class CustomLoggerService extends ConsoleLogger implements LoggerService{
         super.error(message, context);
     }
 
-    warn(message: any, ...optionalParams: any[]){}
+    async warn(message: any, context: string){
+        const entry = `${message}\t${context}`;
+        await this.writeToLogFile(entry);
+        super.warn(message, context);
+    }
 
-    fatal(message: any, ...optionalParams: any[]){}
+    async fatal(message: any, context: string){
+        const entry = `${message}\t${context}`;
+        await this.writeToLogFile(entry);
+        super.fatal(message, context);
+    }
 
     // 
 
-    debug(message: any, ...optionalParams: any[]){}
+    async debug(message: any, context: string){
+        const entry = `${message}\t${context}`;
+        await this.writeToLogFile(entry);
+        super.debug(message, context);
+    }
 
-    verbose(message: any, ...optionalParams: any[]) {
-        
+    async verbose(message: any, context: string) {
+        const entry = `${message}\t${context}`;
+        await this.writeToLogFile(entry);
+        super.verbose(message, context);
     }
 }

@@ -14,10 +14,25 @@ async function bootstrap() {
     bufferLogs: true,
   });
   const logger = app.get(CustomLoggerService);
-  app.useLogger(logger);
+  // app.useLogger(logger);
   app.useGlobalInterceptors(new LoggingInterceptor(logger));
+
+  // uncaughtException and unhandledRejection
+
+  process.on('uncaughtException', (err) => {
+    logger.error(err.message, '');
+
+    process.exit(1);
+  })
+
+  process.on('unhandledRejection', (err) => {
+    logger.error(`${err}`, '');
+
+    process.exit(1);
+  })
+  // 
   
-  app.useGlobalPipes(new ValidationPipe()); //
+  app.useGlobalPipes(new ValidationPipe()); 
   const config = new DocumentBuilder()
     .setTitle('Home Library API')
     .setDescription('The Home Library API description')
